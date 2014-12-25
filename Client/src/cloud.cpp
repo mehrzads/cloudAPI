@@ -10,7 +10,7 @@
 #include "cloud.h" 
 #include "common.h" 
 
-int command[10];
+unsigned int command[10];
 void error(const char *msg)
 {
     perror(msg);
@@ -43,14 +43,13 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
 cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
     command[0] = AllocCommand;
     command[1] = size;
-    int n = write(socketID, &command, 8);
+    int n = write(socketID, command, 8);
     if (n < 0)
       return CloudErrorWrite;
-    void * cloudPtrFromCloud;
-    n = read(socketID, &cloudPtrFromCloud, 4);
-    if (n !=4)
+    n = read(socketID, command, 8);
+    if (n !=8)
       return CloudErrorRead;
-    *cloudPtr =  cloudPtrFromCloud;
+    *cloudPtr =  (void *) ((((long int)command[0]) <<32) | command[1]);
     return CloudSuccess;
 
 }
@@ -60,8 +59,11 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
   if (kind == cloudMemcpyClientToCloud) {
     command[0] = GetCommand;
     command[1] = count;
-    command[2] = (int)(dst);
-    int n = write(socketID, &command, 12);
+    unsigned int x = (unsigned int)(( ((long unsigned)dst) & 0xFFFFFFFF00000000) >> 32);
+    unsigned int y = (unsigned int)(((long unsigned)dst) & 0xFFFFFFFF);
+    command[2] = x;
+    command[3] = y;
+    int n = write(socketID, command, 16);
     if (n < 0)
       return CloudErrorWrite;
     n = write(socketID, src, count);
@@ -72,11 +74,14 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
   else if (kind == cloudMemcpyCloudToClient) {
     command[0] = SendCommand;
     command[1] = count;
-    command[2] = (int)(src);
-    int n = write(socketID, &command, 12);
+    unsigned int x = (unsigned int)(( ((long unsigned)src) & 0xFFFFFFFF00000000) >> 32);
+    unsigned int y = (unsigned int)(((long unsigned)src) & 0xFFFFFFFF);
+    command[2] = x;
+    command[3] = y;
+    int n = write(socketID, command, 16);
     if (n < 0)
       return CloudErrorWrite;
-    int sent = 0;
+    unsigned int sent = 0;
     while (sent < count){
       n = read(socketID, dst + sent, count - sent);
       sent += n;
@@ -91,8 +96,11 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
 //make it free
 cloudError_t cloudFree(int socketID, void * cloudPtr){
     command[0] = FreeCommand;
-    command[1] = (int)(cloudPtr);
-    int n = write(socketID, &command, 8);
+    unsigned int x = (unsigned int)(( (long unsigned)cloudPtr & 0xFFFFFFFF00000000) >> 32);
+    unsigned int y = (unsigned int)((long unsigned)cloudPtr & 0xFFFFFFFF);
+    command[1] = x;
+    command[2] = y;
+    int n = write(socketID, command, 12);
     if (n < 0)
       return CloudErrorWrite;
     return CloudSuccess;
@@ -100,7 +108,7 @@ cloudError_t cloudFree(int socketID, void * cloudPtr){
 
 cloudError_t cloudFinish( int socketID){
     command[0] = CloseCommand;
-    int n = write(socketID, &command, 4);
+    int n = write(socketID, command, 4);
     if (n < 0)
       return CloudErrorWrite;
     close(socketID);

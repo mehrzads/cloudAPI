@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     float * c_A;
     cloudInit(portno, hostname, sockfd);
 
-    int size = 2048;
+    int size = 8192 * 8192 ;
     float * A = (float *) malloc( size * sizeof(float));
     float * B = (float *) malloc( size * sizeof(float));
     cloudMalloc(sockfd, (void **)&c_A, size * sizeof(float));
@@ -42,26 +42,25 @@ int main(int argc, char *argv[])
 	A[i] = float(rand())/INT_MAX;
      }
 
-      auto start_time = std::chrono::steady_clock::now();
-      cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float),  cloudMemcpyClientToCloud);
-      cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float),  cloudMemcpyCloudToClient);
-      
-      double time_in_seconds = std::chrono::duration_cast<std::chrono::milliseconds>
-	      (std::chrono::steady_clock::now() - start_time).count() / 1000.0;
-      
-      printf("Transfer from server %f ms\n", time_in_seconds * 1000);
+    auto start_time = std::chrono::steady_clock::now();
+    cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float),  cloudMemcpyClientToCloud);
+    cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float),  cloudMemcpyCloudToClient);
+    double time_in_seconds = std::chrono::duration_cast<std::chrono::milliseconds>
+            (std::chrono::steady_clock::now() - start_time).count() / 1000.0;
+    
+    printf("Transfer from server %f ms\n", time_in_seconds * 1000);
+    printf("Transfer rate %f Gbps\n", (size * sizeof(float) * 8 * 2 )/(1024 * 1024 *1024 *time_in_seconds) );
 	      
       
       
-      printf("Computation time %f ms\n", time_in_seconds * 1000);
-      int ferror = 0;
-      for (int i = 0; i < size ; i++)
-	if (A[i] != B[i])
-	  ferror =1;
-     if (ferror ==0)
-	printf("Passed\n");
-     else
-	printf("Failed\n");       
+    int ferror = 0;
+    for (int i = 0; i < size ; i++)
+       if (A[i] != B[i])
+         ferror =1;
+    if (ferror ==0)
+       printf("Passed\n");
+    else
+       printf("Failed\n");       
 
     free(A);
     free(B);

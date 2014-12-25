@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall -std=c++11 -fpermissive
+CFLAGS=-c -Wall -std=c++11
 LDFLAGS= -lpthread 
 SOURCES= src/client.cpp src/cloud.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
