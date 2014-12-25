@@ -58,7 +58,7 @@ bool memcpyToCloud(int sockfd, const void * src, size_t count){
 
 
 bool memcpyFromCloud(int sockfd, void * dst,  size_t count){
-    int sent = 0;
+    unsigned int sent = 0;
     while(sent < count){
       int n = read(sockfd, dst + sent, count - sent);
       sent += n;
@@ -79,45 +79,55 @@ int main(int argc, char *argv[])
         exit(1);
     }
     portno = atoi(argv[1]);
-    int command[10];
+    unsigned int command[10];
     
     newsockfd = intitializeSocket(portno, sockfd);
+    bool done = false;
+    while(!done){
     cloudCommandKind commandKind;
     memcpyFromCloud(newsockfd, &commandKind, 4);
 
     int size = 0;
     int count = 0;
     void * cloudPtr;
+    unsigned int x;
+    unsigned int y;
+
     switch(commandKind){
       case AllocCommand:
 	memcpyFromCloud(newsockfd, command, 4);
-        size = command[0];
+	size = command[0];
 	cloudPtr = malloc(size);
-	command[0] = (int)(cloudPtr);
-	memcpyToCloud(newsockfd, command, 4);
+ 	x = (unsigned int)(( ((long unsigned)cloudPtr) & 0xFFFFFFFF00000000) >> 32);
+ 	y = (unsigned int)(((long unsigned)cloudPtr) & 0xFFFFFFFF);
+	command[0] = x;
+	command[1] = y;
+	memcpyToCloud(newsockfd, command, 8);
 	break;
       case GetCommand:
-	memcpyFromCloud(newsockfd, command, 8);
+	memcpyFromCloud(newsockfd, command, 12);
 	count = command[0];
-	cloudPtr = (void *)command[1];
-	memcpyToCloud(newsockfd, cloudPtr, count);
-	break;
-      case SendCommand:
-	memcpyFromCloud(newsockfd, command, 8);
-	count = command[0];
-	cloudPtr = (void *)command[1];
+	cloudPtr =  (void *) ((((long int)command[1]) <<32) | command[2]);
 	memcpyFromCloud(newsockfd, cloudPtr, count);
 	break;
+      case SendCommand:
+	memcpyFromCloud(newsockfd, command, 12);
+	count = command[0];
+	cloudPtr =  (void *) ((((long int)command[1]) <<32) | command[2]);
+	memcpyToCloud(newsockfd, cloudPtr, count);
+	break;
       case FreeCommand:
-	memcpyFromCloud(newsockfd, command, 4);
-	cloudPtr = (void *)command[0];
+	memcpyFromCloud(newsockfd, command, 8);
+	cloudPtr =  (void *) ((((long int)command[0]) <<32) | command[1]);
 	free(cloudPtr);
 	break;
       case CloseCommand:
 	close(newsockfd);
 	close(sockfd);
+	done = true;
 	break;
     }
+}
 
     return 0; 
 }
