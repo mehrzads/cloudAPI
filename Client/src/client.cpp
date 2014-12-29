@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
 	A[i] = float(rand())/INT_MAX;
      }
 
-    size_t compressedSize;
     auto start_time = std::chrono::steady_clock::now();
     cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float), cloudMemcpyClientToCloud);
     cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float), cloudMemcpyCloudToClient);
