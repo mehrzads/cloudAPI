@@ -19,10 +19,9 @@
 
 int main(int argc, char *argv[])
 {
-    int sockfd, portno, n;
+    int sockfd, portno;
     
     // Reading the arguments
-    int result[1];
     if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
        exit(0);
@@ -42,9 +41,10 @@ int main(int argc, char *argv[])
 	A[i] = float(rand())/INT_MAX;
      }
 
+    size_t compressedSize;
     auto start_time = std::chrono::steady_clock::now();
-    cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float),  cloudMemcpyClientToCloud);
-    cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float),  cloudMemcpyCloudToClient);
+    cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float), cloudMemcpyClientToCloud);
+    cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float), cloudMemcpyCloudToClient);
     double time_in_seconds = std::chrono::duration_cast<std::chrono::milliseconds>
             (std::chrono::steady_clock::now() - start_time).count() / 1000.0;
     
