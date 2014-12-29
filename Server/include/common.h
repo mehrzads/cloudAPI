@@ -20,7 +20,9 @@ enum cloudError_t{
 enum cloudCommandKind{
     AllocCommand,
     GetCommand,
+    GetCompressedCommand,
     SendCommand,
+    SendCompressedCommand,
     FreeCommand,
     CloseCommand
 };

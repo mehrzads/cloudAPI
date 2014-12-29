@@ -54,32 +54,33 @@ cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
 
 }
 
-cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t  count,   enum cloudMemcpyKind	 kind ){
+cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t  count,   enum cloudMemcpyKind	 kind , bool isCompressed){
  
+  if (isCompressed){
   if (kind == cloudMemcpyClientToCloud) {
-    
-//    unsigned char * out  = (unsigned char *) malloc(count);
-//    compress((unsigned char *)src, count, out, compressedSize, 9);
-//    printf("How many bytes?%d\t%d\n", count, compressedSize);
-    command[0] = GetCommand;
+    size_t compressedSize;
+    unsigned char * out  = (unsigned char *) malloc(count);
+    compress((unsigned char *)src, count, out, compressedSize, 9);
+    printf("How many bytes?%d\t%d\n", count, compressedSize);
+    command[0] = GetCompressedCommand;
     command[1] =  count;
+    command[2] =  compressedSize;
     unsigned int x = (unsigned int)(( ((long unsigned)dst) & 0xFFFFFFFF00000000) >> 32);
     unsigned int y = (unsigned int)(((long unsigned)dst) & 0xFFFFFFFF);
-    command[2] = x;
-    command[3] = y;
+    command[3] = x;
+    command[4] = y;
     int n = write(socketID, command, 16);
     if (n < 0)
       return CloudErrorWrite;
-    n = write(socketID, src, count);
-   // n = write(socketID, out, compressedSize);
+    n = write(socketID, out, compressedSize);
     if (n < 0)
       return CloudErrorWrite;
-  //  free(out);
+    free(out);
     
   }    
   else if (kind == cloudMemcpyCloudToClient) {
-    command[0] = SendCommand;
-    command[1] = count;//compressedSize;
+    command[0] = SendCompressedCommand;
+    command[1] = count;
     unsigned int x = (unsigned int)(( ((long unsigned)src) & 0xFFFFFFFF00000000) >> 32);
     unsigned int y = (unsigned int)(((long unsigned)src) & 0xFFFFFFFF);
     command[2] = x;
@@ -87,20 +88,64 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
     int n = write(socketID, command, 16);
     if (n < 0)
       return CloudErrorWrite;
+
+    n = read(socketID, command, 4);
+    if (n < 0){ 
+      return CloudErrorRead;
+    }
+    size_t compressedSize = command[0]; 
     unsigned int sent = 0;
-//    unsigned char * out  = (unsigned char *) malloc(compressedSize * sizeof(char));
+    unsigned char * out  = (unsigned char *) malloc(compressedSize * sizeof(char));
     while (sent < count){
-      n = read(socketID, dst + sent, count - sent);
-//      n = read(socketID, out + sent, compressedSize - sent);
+      n = read(socketID, out + sent, compressedSize - sent);
       sent += n;
       if (n < 0){ 
 	 return CloudErrorRead;
       }
     }
 
- //   decompress(out, compressedSize, (unsigned char *)dst, count);
-  //  free(out);
+    decompress(out, compressedSize, (unsigned char *)dst, count);
+    free(out);
 
+  }
+  }
+  else{
+
+    if (kind == cloudMemcpyClientToCloud) {
+    
+      command[0] = GetCommand;
+      command[1] =  count;
+      unsigned int x = (unsigned int)(( ((long unsigned)dst) & 0xFFFFFFFF00000000) >> 32);
+      unsigned int y = (unsigned int)(((long unsigned)dst) & 0xFFFFFFFF);
+      command[2] = x;
+      command[3] = y;
+      int n = write(socketID, command, 16);
+      if (n < 0)
+	return CloudErrorWrite;
+      n = write(socketID, src, count);
+      if (n < 0)
+	return CloudErrorWrite;
+    
+    }    
+    else if (kind == cloudMemcpyCloudToClient) {
+      command[0] = SendCommand;
+      command[1] = count;
+      unsigned int x = (unsigned int)(( ((long unsigned)src) & 0xFFFFFFFF00000000) >> 32);
+      unsigned int y = (unsigned int)(((long unsigned)src) & 0xFFFFFFFF);
+      command[2] = x;
+      command[3] = y;
+      int n = write(socketID, command, 16);
+      if (n < 0)
+	return CloudErrorWrite;
+      unsigned int sent = 0;
+      while (sent < count){
+	n = read(socketID, dst + sent, count - sent);
+	sent += n;
+	if (n < 0){ 
+	  return CloudErrorRead;
+	}
+      }
+    }
   }
   return CloudSuccess;
 } 

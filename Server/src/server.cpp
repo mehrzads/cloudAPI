@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <chrono>
 #include "common.h"
+#include "compression.h"
 
 
 
@@ -89,6 +90,8 @@ int main(int argc, char *argv[])
 
     int size = 0;
     int count = 0;
+    size_t compressedSize;
+    unsigned char * compressedData;
     void * cloudPtr;
     unsigned int x;
     unsigned int y;
@@ -115,6 +118,27 @@ int main(int argc, char *argv[])
 	count = command[0];
 	cloudPtr =  (void *) ((((long int)command[1]) <<32) | command[2]);
 	memcpyToCloud(newsockfd, cloudPtr, count);
+	break;
+      case GetCompressedCommand:
+	memcpyFromCloud(newsockfd, command, 12);
+	count = command[0];
+	compressedSize = command[1];
+	cloudPtr =  (void *) ((((long int)command[2]) <<32) | command[3]);
+	compressedData = (unsigned char * )malloc(compressedSize);
+	memcpyFromCloud(newsockfd, (void *) compressedData, compressedSize);
+	decompress(compressedData, compressedSize, (unsigned char *)cloudPtr, count);
+	free(compressedData);
+	break;
+      case SendCompressedCommand:
+	memcpyFromCloud(newsockfd, command, 12);
+	count = command[0];
+	cloudPtr =  (void *) ((((long int)command[1]) <<32) | command[2]);
+	compressedData = (unsigned char * )malloc(compressedSize);
+	compress((unsigned char *)cloudPtr, count, compressedData, compressedSize, 1);
+        command[0] = compressedSize;
+	memcpyToCloud(newsockfd, command, 4);
+	memcpyToCloud(newsockfd, compressedData, compressedSize);
+	free(compressedData);
 	break;
       case FreeCommand:
 	memcpyFromCloud(newsockfd, command, 8);
