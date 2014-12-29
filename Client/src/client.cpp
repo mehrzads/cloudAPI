@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
      }
 
     auto start_time = std::chrono::steady_clock::now();
-    cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float), cloudMemcpyClientToCloud, false);
-    cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float), cloudMemcpyCloudToClient, false);
+    cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float), cloudMemcpyClientToCloud, true);
+    cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float), cloudMemcpyCloudToClient, true);
     double time_in_seconds = std::chrono::duration_cast<std::chrono::milliseconds>
             (std::chrono::steady_clock::now() - start_time).count() / 1000.0;
     
