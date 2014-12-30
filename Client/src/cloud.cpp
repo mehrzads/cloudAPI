@@ -79,7 +79,7 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
     if (kind == cloudMemcpyClientToCloud) {
       size_t compressedSize;
       unsigned char * out  = (unsigned char *) malloc(count);
-      compress((unsigned char *)src, count, out, compressedSize, 1);
+      compress((const unsigned char *)src, count, out, compressedSize, 1);
       printf("GetCompressedData%d\t%d\n", count, compressedSize);
       command[0] = GetCompressedCommand;
       command[1] =  count;
@@ -99,6 +99,7 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
     // Then client will send the data to the server
     // compressedSize words
     else if (kind == cloudMemcpyCloudToClient) {
+      printf("We are here\n");
       command[0] = SendCompressedCommand;
       command[1] = count;
       std::pair<uint32_t, uint32_t> address = convert64to32(src);

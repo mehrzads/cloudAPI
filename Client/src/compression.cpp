@@ -114,23 +114,19 @@ int decompressZlib(unsigned char * in, size_t sizeIn, unsigned char * out, size_
 }
 
 
-int compressSnappy(const char * in, size_t sizeIn,  char * out, size_t &sizeOut){
 
-  return snappy_compress(in, sizeIn, out, &sizeOut);
-}
-
-int decompressSnappy(const char * in, size_t sizeIn,  char * out, size_t sizeOut){
-
-  return snappy_uncompress(in, sizeIn, out, &sizeOut);
-}
 
 
 
 int compress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
-  return compressSnappy((const char *)in, sizeIn, (char *)out, sizeOut);
+  size_t so;
+  snappy_compress((const char *)in, sizeIn, (char *)out,  &so);
+  printf("After Snappy%zd\n", so); 
+  sizeOut = so;
+  return 0;
 }
 
 int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t sizeOut){
 
-  return decompressSnappy((const char *)in,  sizeIn, (char *)out,  sizeOut);
+  return snappy_uncompress((const char *)in, sizeIn, (char *)out, &sizeOut);
 }
