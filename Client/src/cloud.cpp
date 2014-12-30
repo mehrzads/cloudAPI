@@ -80,7 +80,7 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       size_t compressedSize;
       unsigned char * out  = (unsigned char *) malloc(count);
       compress((const unsigned char *)src, count, out, compressedSize, 1);
-      printf("GetCompressedData%d\t%d\n", count, compressedSize);
+      printf("GetCompressedData\t%d\t%d\n", count, compressedSize);
       command[0] = GetCompressedCommand;
       command[1] =  count;
       command[2] =  compressedSize;
