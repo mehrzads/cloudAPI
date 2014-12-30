@@ -32,13 +32,13 @@ int main(int argc, char *argv[])
     float * c_A;
     cloudInit(portno, hostname, sockfd);
 
-    int size = 8192  ;
+    int size = 1024  * 1024 ;
     float * A = (float *) malloc( size * sizeof(float));
     float * B = (float *) malloc( size * sizeof(float));
     cloudMalloc(sockfd, (void **)&c_A, size * sizeof(float));
       
     for (int i = 0; i < size; i++){
-	A[i] = float(rand())/INT_MAX;
+	A[i] = i;//float(rand())/INT_MAX;
      }
 
     auto start_time = std::chrono::steady_clock::now();

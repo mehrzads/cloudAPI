@@ -77,8 +77,8 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
     // Then client will send the data to the server
     // compressedSize words
     if (kind == cloudMemcpyClientToCloud) {
-      size_t compressedSize;
-      unsigned char * out  = (unsigned char *) malloc(count);
+      size_t compressedSize= getMaxLength( count); 
+      unsigned char * out  = (unsigned char *) malloc(compressedSize);
       compress((const unsigned char *)src, count, out, compressedSize, 1);
       printf("GetCompressedData\t%d\t%d\n", count, compressedSize);
       command[0] = GetCompressedCommand;
