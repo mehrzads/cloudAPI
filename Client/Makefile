@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-c -Wall -std=c++11
-LDFLAGS= -lpthread -lz
+LDFLAGS= -lpthread -lz -lsnappy
 SOURCES= src/client.cpp src/cloud.cpp src/compression.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 INCLUDES= -I. -Iinclude/	

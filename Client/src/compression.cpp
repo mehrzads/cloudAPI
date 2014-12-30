@@ -14,6 +14,7 @@
 
 #include "compression.h"
 #include "zlib.h"
+#include "snappy-c.h"
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
 #  include <fcntl.h>
@@ -49,7 +50,8 @@ void zerr(int ret)
     }
 }
 
-int compress (unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
+  
+int compressZlib(unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
 
     int ret, flush;
     z_stream strm;
@@ -78,7 +80,7 @@ int compress (unsigned char * in, size_t sizeIn, unsigned char * out, size_t &si
     return Z_OK;
 }
 
-int decompress(unsigned char * in, unsigned long sizeIn, unsigned char * out, unsigned long sizeOut){
+int decompressZlib(unsigned char * in, size_t sizeIn, unsigned char * out, size_t sizeOut){
 
     int ret;
     z_stream strm;
@@ -112,6 +114,23 @@ int decompress(unsigned char * in, unsigned long sizeIn, unsigned char * out, un
 }
 
 
+int compressSnappy(const char * in, size_t sizeIn,  char * out, size_t &sizeOut){
+
+  return snappy_compress(in, sizeIn, out, &sizeOut);
+}
+
+int decompressSnappy(const char * in, size_t sizeIn,  char * out, size_t sizeOut){
+
+  return snappy_uncompress(in, sizeIn, out, &sizeOut);
+}
 
 
 
+int compress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
+  return compressSnappy((const char *)in, sizeIn, (char *)out, sizeOut);
+}
+
+int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t sizeOut){
+
+  return decompressSnappy((const char *)in,  sizeIn, (char *)out,  sizeOut);
+}
