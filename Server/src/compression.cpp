@@ -50,6 +50,20 @@ void zerr(int ret)
     }
 }
 
+void serr(int ret)
+{
+    switch (ret) {
+    case 0:
+	printf("OK\n");
+	break;
+    case 1:
+	printf("Invalid input\n");
+	break;
+    case 2:
+	printf("Too small\n");
+	break;
+    }
+}
   
 int compressZlib(unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
 
@@ -113,24 +127,18 @@ int decompressZlib(unsigned char * in, size_t sizeIn, unsigned char * out, size_
     return Z_OK;
 }
 
-
-int compressSnappy(const char * in, size_t sizeIn,  char * out, size_t &sizeOut){
-
-  return snappy_compress(in, sizeIn, out, &sizeOut);
-}
-
-int decompressSnappy(const char * in, size_t sizeIn,  char * out, size_t sizeOut){
-
-  return snappy_uncompress(in, sizeIn, out, &sizeOut);
-}
-
-
-
 int compress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
-  return compressSnappy((const char *)in, sizeIn, (char *)out, sizeOut);
+  int ret = snappy_compress((const char *)in, sizeIn, (char *)out,  &sizeOut);
+  serr(ret);
+  return ret;
+}
+int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t  &sizeOut){
+
+  int ret = snappy_uncompress((const char *)in, sizeIn, (char *)out, &sizeOut);
+  serr(ret);
+  return ret;
 }
 
-int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t sizeOut){
-
-  return decompressSnappy((const char *)in,  sizeIn, (char *)out,  sizeOut);
+size_t getMaxLength( size_t sizeIn){
+  return snappy_max_compressed_length(sizeIn);
 }

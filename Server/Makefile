@@ -1,4 +1,4 @@
-CC=g++
+CC=g++-4.8
 CFLAGS=-c -Wall -std=c++11
 LDFLAGS= -lpthread -lz -lsnappy
 SOURCES= src/server.cpp src/compression.cpp 

@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
     int size = 0;
     int count = 0;
     size_t compressedSize;
+    size_t outputSize;
     unsigned char * compressedData;
     void * cloudPtr;
     unsigned int x;
@@ -120,21 +121,27 @@ int main(int argc, char *argv[])
 	memcpyToCloud(newsockfd, cloudPtr, count);
 	break;
       case GetCompressedCommand:
-	memcpyFromCloud(newsockfd, command, 12);
+	memcpyFromCloud(newsockfd, command, 16);
 	count = command[0];
 	compressedSize = command[1];
 	cloudPtr =  (void *) ((((long int)command[2]) <<32) | command[3]);
 	compressedData = (unsigned char * )malloc(compressedSize);
+	if (!compressedData)
+	  printf("Allocation is NULL\n");	
 	memcpyFromCloud(newsockfd, (void *) compressedData, compressedSize);
-	decompress(compressedData, compressedSize, (unsigned char *)cloudPtr, count);
+	outputSize = (size_t)count;
+	decompress(compressedData, compressedSize, (unsigned char *)cloudPtr, outputSize);
 	free(compressedData);
 	break;
       case SendCompressedCommand:
 	memcpyFromCloud(newsockfd, command, 12);
 	count = command[0];
 	cloudPtr =  (void *) ((((long int)command[1]) <<32) | command[2]);
+	compressedSize = getMaxLength(count);
 	compressedData = (unsigned char * )malloc(compressedSize);
 	compress((unsigned char *)cloudPtr, count, compressedData, compressedSize, 1);
+	if (!compressedData)
+	  printf("Allocation is NULL\n");	
         command[0] = compressedSize;
 	memcpyToCloud(newsockfd, command, 4);
 	memcpyToCloud(newsockfd, compressedData, compressedSize);
