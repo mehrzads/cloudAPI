@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <chrono>
+#include <utility>
 #include "common.h"
 #include "compression.h"
 
@@ -18,6 +19,13 @@ void error(const char *msg)
 {
     perror(msg);
     exit(1);
+}
+
+// Converting pointer to the 4 bytes integers so we can send them to the server
+std::pair<uint32_t, uint32_t> convert64to32(const void * pointer){
+      uint32_t x = (uint32_t)(( ((uint64_t)pointer) & 0xFFFFFFFF00000000) >> 32);
+      uint32_t y = (uint32_t)(((uint64_t)pointer) & 0xFFFFFFFF);
+      return std::make_pair(x,y);
 }
 
 // Initializing the connection
@@ -79,7 +87,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
     portno = atoi(argv[1]);
-    unsigned int command[10];
+    uint32_t command[10];
     newsockfd = intitializeSocket(portno, sockfd);
     bool done = false;
     while(!done){
@@ -92,19 +100,17 @@ int main(int argc, char *argv[])
       size_t outputSize;
       unsigned char * compressedData;
       enum cloudCompressionKind compressionKind;
+      std::pair<uint32_t, uint32_t> address;
       void * cloudPtr;
-      unsigned int x;
-      unsigned int y;
       switch(commandKind){
 	// Allocating in the memory
 	case AllocCommand:
 	  memcpyFromCloud(newsockfd, command, 4);
 	  size = command[0];
 	  cloudPtr = malloc(size);
-	  x = (unsigned int)(( ((long unsigned)cloudPtr) & 0xFFFFFFFF00000000) >> 32);
-	  y = (unsigned int)(((long unsigned)cloudPtr) & 0xFFFFFFFF);
-	  command[0] = x;
-	  command[1] = y;
+          address = convert64to32(cloudPtr);
+          command[0] = address.first;
+          command[1] = address.second;
 	  memcpyToCloud(newsockfd, command, 8);
 	  break;
 	// Recieving the data from the client  
