@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
     size_t compressedSize;
     size_t outputSize;
     unsigned char * compressedData;
+    enum cloudCompressionKind compressionKind;
     void * cloudPtr;
     unsigned int x;
     unsigned int y;
@@ -121,25 +122,27 @@ int main(int argc, char *argv[])
 	memcpyToCloud(newsockfd, cloudPtr, count);
 	break;
       case GetCompressedCommand:
-	memcpyFromCloud(newsockfd, command, 16);
-	count = command[0];
-	compressedSize = command[1];
-	cloudPtr =  (void *) ((((long int)command[2]) <<32) | command[3]);
+	memcpyFromCloud(newsockfd, command, 20);
+        compressionKind  = static_cast<cloudCompressionKind>(command[0]);
+	count = command[1];
+	compressedSize = command[2];
+	cloudPtr =  (void *) ((((long int)command[3]) <<32) | command[4]);
 	compressedData = (unsigned char * )malloc(compressedSize);
 	if (!compressedData)
 	  printf("Allocation is NULL\n");	
 	memcpyFromCloud(newsockfd, (void *) compressedData, compressedSize);
 	outputSize = (size_t)count;
-	decompress(compressedData, compressedSize, (unsigned char *)cloudPtr, outputSize);
+	decompress(compressedData, compressedSize, (unsigned char *)cloudPtr, outputSize, compressionKind);
 	free(compressedData);
 	break;
       case SendCompressedCommand:
-	memcpyFromCloud(newsockfd, command, 12);
-	count = command[0];
-	cloudPtr =  (void *) ((((long int)command[1]) <<32) | command[2]);
-	compressedSize = getMaxLength(count);
+	memcpyFromCloud(newsockfd, command, 16);
+        compressionKind  = static_cast<cloudCompressionKind>(command[0]);
+	count = command[1];
+	cloudPtr =  (void *) ((((long int)command[2]) <<32) | command[3]);
+	compressedSize = getMaxLength(count, compressionKind);
 	compressedData = (unsigned char * )malloc(compressedSize);
-	compress((unsigned char *)cloudPtr, count, compressedData, compressedSize, 1);
+	compress((unsigned char *)cloudPtr, count, compressedData, compressedSize, 1, compressionKind);
 	if (!compressedData)
 	  printf("Allocation is NULL\n");	
         command[0] = compressedSize;

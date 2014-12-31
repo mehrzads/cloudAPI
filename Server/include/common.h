@@ -27,5 +27,10 @@ enum cloudCommandKind{
     CloseCommand
 };
 
+enum cloudCompressionKind{
+    NoCompression,
+    ZlibCompression,
+    SnappyCompression
+};
 #endif /* ifndef COMMON_H */
 

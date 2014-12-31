@@ -26,7 +26,7 @@ std::pair<uint32_t, uint32_t> convert64to32(const void * pointer){
 }
 
 
-//Initializing the connection
+// Initializing the connection
 cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
     struct sockaddr_in serv_addr;
     struct hostent *server;
@@ -62,55 +62,56 @@ cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
     return CloudSuccess;
 }
 
-//cloudMemcpy is transferring data between client and the server
-//It has 4 different cases:
-//compressed, ToServer
-//compressed, FromServer
-//nonCompressed, ToServer
-//nonCompressed, FromServer 
-cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t  count,   enum cloudMemcpyKind	 kind , bool isCompressed){
+// cloudMemcpy is transferring data between client and the server
+// It has 4 different cases:
+// compressed, ToServer
+// compressed, FromServer
+// nonCompressed, ToServer
+// nonCompressed, FromServer 
+cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t  count,   enum cloudMemcpyKind	 directionKind, enum cloudCompressionKind compressKind){
  
-  if (isCompressed){
+  if (compressKind != NoCompression){
     //compressed, ToServer
     // Command which is send to the server:
     // 5 words: CmdIndex, count, compressedSize, pointer
     // Then client will send the data to the server
     // compressedSize words
-    if (kind == cloudMemcpyClientToCloud) {
-      size_t compressedSize= getMaxLength( count); 
+    if (directionKind == cloudMemcpyClientToCloud) {
+      size_t compressedSize= getMaxLength( count, compressKind); 
       unsigned char * out  = (unsigned char *) malloc(compressedSize);
-      compress((const unsigned char *)src, count, out, compressedSize, 1);
-      printf("GetCompressedData\t%d\t%d\n", count, compressedSize);
+      compress((const unsigned char *)src, count, out, compressedSize, 1, compressKind);
       command[0] = GetCompressedCommand;
-      command[1] =  count;
-      command[2] =  compressedSize;
+      command[1] = compressKind;
+      command[2] =  count;
+      command[3] =  compressedSize;
       std::pair<uint32_t, uint32_t> address = convert64to32(dst);
-      command[3] = address.first;
-      command[4] = address.second;
-      int n = write(socketID, command, 20);
+      command[4] = address.first;
+      command[5] = address.second;
+      int n = write(socketID, command, 24);
       if (n < 0) return CloudErrorWrite;
       n = write(socketID, out, compressedSize);
       if (n < 0) return CloudErrorWrite;
       free(out);
     }    
-    //compressed, ToServer
+    //compressed, FromServer
     // Command which is send to the server:
-    // 5 words: CmdIndex, count, compressedSize, pointer
-    // Then client will send the data to the server
+    // 4 words: CmdIndex, count, pointer
+    // Then server will reply back with the compressedSize
+    // Then client will receive the data to the server
     // compressedSize words
-    else if (kind == cloudMemcpyCloudToClient) {
-      printf("We are here\n");
+    else if (directionKind == cloudMemcpyCloudToClient) {
+      // This can be compressed
       command[0] = SendCompressedCommand;
-      command[1] = count;
+      command[1] = compressKind;
+      command[2] = count;
       std::pair<uint32_t, uint32_t> address = convert64to32(src);
-      command[2] = address.first;
-      command[3] = address.second;
-      int n = write(socketID, command, 16);
+      command[3] = address.first;
+      command[4] = address.second;
+      int n = write(socketID, command, 20);
       if (n < 0) return CloudErrorWrite;
       n = read(socketID, command, 4);
       if (n < 0) return CloudErrorRead;
       size_t compressedSize = command[0]; 
-      printf("SendCompressedData\t%d\t%d\n", count, compressedSize);
       unsigned int sent = 0;
       unsigned char * out  = (unsigned char *) malloc(compressedSize * sizeof(char));
       while (sent < compressedSize){
@@ -118,12 +119,18 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
 	sent += n;
 	if (n < 0) return CloudErrorRead;
       }
-      decompress(out, compressedSize, (unsigned char *)dst, count);
+      decompress(out, compressedSize, (unsigned char *)dst, count, compressKind);
       free(out);
     }
   }
   else{
-    if (kind == cloudMemcpyClientToCloud) {
+
+    // Uncompressed, ToServer
+    // Command which is send to the server:
+    // 4 words: CmdIndex, count, pointer
+    // Then client will send the data to the server
+    // count words
+    if (directionKind == cloudMemcpyClientToCloud) {
       command[0] = GetCommand;
       command[1] =  count;
       std::pair<uint32_t, uint32_t> address = convert64to32(dst);
@@ -133,8 +140,14 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       if (n < 0) return CloudErrorWrite;
       n = write(socketID, src, count);
       if (n < 0) return CloudErrorWrite;
-    }    
-    else if (kind == cloudMemcpyCloudToClient) {
+    }  
+
+    // Uncompressed, FromServer
+    // Command which is send to the server:
+    // 4 words: CmdIndex, count, pointer
+    // Then client will receive the data to the server
+    // count words
+    else if (directionKind == cloudMemcpyCloudToClient) {
       command[0] = SendCommand;
       command[1] = count;
       std::pair<uint32_t, uint32_t> address = convert64to32(src);
@@ -152,7 +165,8 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
   }
   return CloudSuccess;
 } 
-//make it free
+
+// Freeing the array on the cloud
 cloudError_t cloudFree(int socketID, void * cloudPtr){
     command[0] = FreeCommand;
     std::pair<uint32_t, uint32_t> address = convert64to32(cloudPtr);
@@ -163,6 +177,7 @@ cloudError_t cloudFree(int socketID, void * cloudPtr){
     return CloudSuccess;
 }
 
+// Finishing the connection
 cloudError_t cloudFinish( int socketID){
     command[0] = CloseCommand;
     int n = write(socketID, command, 4);

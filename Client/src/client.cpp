@@ -32,18 +32,18 @@ int main(int argc, char *argv[])
     float * c_A;
     cloudInit(portno, hostname, sockfd);
 
-    int size = 1024  * 1024 ;
+    int size = 8192 * 8192;
     float * A = (float *) malloc( size * sizeof(float));
     float * B = (float *) malloc( size * sizeof(float));
     cloudMalloc(sockfd, (void **)&c_A, size * sizeof(float));
       
     for (int i = 0; i < size; i++){
-	A[i] = i;//float(rand())/INT_MAX;
+	A[i] = i%50;//float(rand())/INT_MAX;
      }
 
     auto start_time = std::chrono::steady_clock::now();
-    cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float), cloudMemcpyClientToCloud, true);
-    cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float), cloudMemcpyCloudToClient, true);
+    cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float), cloudMemcpyClientToCloud, SnappyCompression);
+    cloudMemcpy(sockfd,  B,  c_A,  size * sizeof(float), cloudMemcpyCloudToClient, SnappyCompression);
     double time_in_seconds = std::chrono::duration_cast<std::chrono::milliseconds>
             (std::chrono::steady_clock::now() - start_time).count() / 1000.0;
     

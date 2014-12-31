@@ -50,8 +50,22 @@ void zerr(int ret)
     }
 }
 
+void serr(int ret)
+{
+    switch (ret) {
+    case 0:
+	printf("OK\n");
+	break;
+    case 1:
+	printf("Invalid input\n");
+	break;
+    case 2:
+	printf("Too small\n");
+	break;
+    }
+}
   
-int compressZlib(unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
+int compressZlib( unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
 
     int ret, flush;
     z_stream strm;
@@ -113,19 +127,50 @@ int decompressZlib(unsigned char * in, size_t sizeIn, unsigned char * out, size_
     return Z_OK;
 }
 
-
-
-
-
-
-int compress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
-  return snappy_compress((const char *)in, sizeIn, (char *)out,  &sizeOut);
+int compress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level, enum cloudCompressionKind compressKind){
+  int ret = 0;
+  switch(compressKind){
+  case NoCompression:
+    printf("This should never happen\n");
+    return 0;
+  case ZlibCompression:
+    ret = compressZlib((unsigned char *)in, sizeIn, out, sizeOut, level);
+    zerr(ret);
+    return ret;
+  case SnappyCompression:
+    ret = snappy_compress((const char *)in, sizeIn, (char *)out,  &sizeOut);
+    serr(ret);
+    return ret;
+  }
+  return ret;
 }
-int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t sizeOut){
-
-  return snappy_uncompress((const char *)in, sizeIn, (char *)out, &sizeOut);
+int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t  &sizeOut, enum cloudCompressionKind compressKind){
+  int ret = 0;
+  switch(compressKind){
+  case NoCompression:
+    printf("This should never happen\n");
+    return 0;
+  case ZlibCompression:
+    ret = decompressZlib((unsigned char *)in, sizeIn, out, sizeOut);
+    zerr(ret);
+    return ret;
+  case SnappyCompression:
+    ret = snappy_uncompress((const char *)in, sizeIn, (char *)out, &sizeOut);
+    serr(ret);
+    return ret;
+  }
+  return ret;
 }
 
-size_t getMaxLength( size_t sizeIn){
-  return snappy_max_compressed_length(sizeIn);
+size_t getMaxLength(size_t sizeIn, enum cloudCompressionKind compressKind){
+  switch(compressKind){
+  case NoCompression:
+    printf("This should never happen\n");
+    return 0;
+  case ZlibCompression:
+    return sizeIn;
+  case SnappyCompression:
+    return snappy_max_compressed_length(sizeIn);
+  }
+  return 0;
 }
