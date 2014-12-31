@@ -26,43 +26,40 @@
 
 
 /* report a zlib or i/o error */
-void zerr(int ret)
+int zerr(int ret)
 {
-    fputs("zpipe: ", stderr);
     switch (ret) {
     case Z_ERRNO:
-        if (ferror(stdin))
-            fputs("error reading stdin\n", stderr);
-        if (ferror(stdout))
-            fputs("error writing stdout\n", stderr);
+        printf("error reading or writing\n");
         break;
     case Z_STREAM_ERROR:
-        fputs("invalid compression level\n", stderr);
+        printf("invalid compression level\n");
         break;
     case Z_DATA_ERROR:
-        fputs("invalid or incomplete deflate data\n", stderr);
+        printf("invalid or incomplete deflate data\n");
         break;
     case Z_MEM_ERROR:
-        fputs("out of memory\n", stderr);
+        printf("out of memory\n");
         break;
     case Z_VERSION_ERROR:
-        fputs("zlib version mismatch!\n", stderr);
+        printf("zlib version mismatch!\n");
     }
+    return ret;
 }
 
-void serr(int ret)
+int serr(int ret)
 {
     switch (ret) {
-    case 0:
-	printf("OK\n");
+    case SNAPPY_OK:
 	break;
-    case 1:
+    case SNAPPY_INVALID_INPUT:
 	printf("Invalid input\n");
 	break;
-    case 2:
+    case SNAPPY_BUFFER_TOO_SMALL:
 	printf("Too small\n");
 	break;
     }
+    return ret;
 }
   
 int compressZlib( unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level){
@@ -134,13 +131,9 @@ int compress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_
     printf("This should never happen\n");
     return 0;
   case ZlibCompression:
-    ret = compressZlib((unsigned char *)in, sizeIn, out, sizeOut, level);
-    zerr(ret);
-    return ret;
+    return zerr(compressZlib((unsigned char *)in, sizeIn, out, sizeOut, level));
   case SnappyCompression:
-    ret = snappy_compress((const char *)in, sizeIn, (char *)out,  &sizeOut);
-    serr(ret);
-    return ret;
+    return serr(snappy_compress((const char *)in, sizeIn, (char *)out,  &sizeOut));
   }
   return ret;
 }
@@ -151,13 +144,9 @@ int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, siz
     printf("This should never happen\n");
     return 0;
   case ZlibCompression:
-    ret = decompressZlib((unsigned char *)in, sizeIn, out, sizeOut);
-    zerr(ret);
-    return ret;
+    return zerr(decompressZlib((unsigned char *)in, sizeIn, out, sizeOut));
   case SnappyCompression:
-    ret = snappy_uncompress((const char *)in, sizeIn, (char *)out, &sizeOut);
-    serr(ret);
-    return ret;
+    return serr(snappy_uncompress((const char *)in, sizeIn, (char *)out, &sizeOut));
   }
   return ret;
 }
