@@ -16,14 +16,6 @@
 #include "zlib.h"
 #include "snappy-c.h"
 
-#if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
-#  include <fcntl.h>
-#  include <io.h>
-#  define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
-#else
-#  define SET_BINARY_MODE(file)
-#endif
-
 
 /* report a zlib or i/o error */
 int zerr(int ret)
@@ -47,6 +39,7 @@ int zerr(int ret)
     return ret;
 }
 
+/* report a snappy error */
 int serr(int ret)
 {
     switch (ret) {
@@ -72,21 +65,15 @@ int compressZlib( unsigned char * in, size_t sizeIn, unsigned char * out, size_t
     ret = deflateInit(&strm, level);
     if (ret != Z_OK)
         return ret;
-
-    /* compress until end of file */
     strm.avail_in =  sizeIn;
     flush = Z_FINISH ;
     strm.next_in = in;
-
-    /* run deflate() on input until output buffer not full, finish
-       compression if all of source has been read in */
     strm.avail_out = sizeIn;
     strm.next_out = out;
-    ret = deflate(&strm, flush);    /* no bad return value */
-    assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
-    assert(strm.avail_in == 0);     /* all input will be used */
+    ret = deflate(&strm, flush);    
+    assert(ret != Z_STREAM_ERROR);  
+    assert(strm.avail_in == 0);     
     sizeOut = sizeIn - strm.avail_out;
-    /* clean up and return */
     (void)deflateEnd(&strm);
     return Z_OK;
 }
@@ -103,27 +90,25 @@ int decompressZlib(unsigned char * in, size_t sizeIn, unsigned char * out, size_
     ret = inflateInit(&strm);
     if (ret != Z_OK)
         return ret;
-
     strm.next_in = in;
     strm.avail_in = sizeIn;
     strm.avail_out = sizeOut;
     strm.next_out = out;
     ret = inflate(&strm, Z_NO_FLUSH);
-    assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
+    assert(ret != Z_STREAM_ERROR);  
     switch (ret) {
     case Z_NEED_DICT:
-        ret = Z_DATA_ERROR;     /* and fall through */
+        ret = Z_DATA_ERROR;     
     case Z_DATA_ERROR:
     case Z_MEM_ERROR:
         (void)inflateEnd(&strm);
         return ret;
     }
-
     (void)inflateEnd(&strm);
-
     return Z_OK;
 }
 
+// The main compression method which is used for all different techniques
 int compress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t &sizeOut, int level, enum cloudCompressionKind compressKind){
   int ret = 0;
   switch(compressKind){
@@ -137,6 +122,8 @@ int compress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_
   }
   return ret;
 }
+
+// The main decompression method which is used for all different techniques
 int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, size_t  &sizeOut, enum cloudCompressionKind compressKind){
   int ret = 0;
   switch(compressKind){
@@ -151,6 +138,7 @@ int decompress(const unsigned char * in, size_t sizeIn, unsigned char * out, siz
   return ret;
 }
 
+// Returns the maximum length of the compressed data for all different compression techniques
 size_t getMaxLength(size_t sizeIn, enum cloudCompressionKind compressKind){
   switch(compressKind){
   case NoCompression:
@@ -158,6 +146,7 @@ size_t getMaxLength(size_t sizeIn, enum cloudCompressionKind compressKind){
     return 0;
   case ZlibCompression:
     return sizeIn;
+  //Snappy compressed data might have bigger size than the original data  
   case SnappyCompression:
     return snappy_max_compressed_length(sizeIn);
   }
