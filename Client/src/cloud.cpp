@@ -100,7 +100,7 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
     // Then client will receive the data to the server
     // compressedSize words
     else if (directionKind == cloudMemcpyCloudToClient) {
-      // This can be compressed
+      // TODO:This can be improved
       command[0] = SendCompressedCommand;
       command[1] = compressKind;
       command[2] = count;

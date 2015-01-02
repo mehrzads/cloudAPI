@@ -1,9 +1,9 @@
 CC=g++-4.8
 CFLAGS=-c -Wall -std=c++11
 LDFLAGS= -lpthread -lz -lsnappy
-SOURCES= src/server.cpp src/compression.cpp 
+SOURCES= src/server.cpp ../Common/src/compression.cpp 
 OBJECTS=$(SOURCES:.cpp=.o)
-INCLUDES= -I. -Iinclude/	
+INCLUDES= -I. -Iinclude/ -I../Common/include       
 
 EXECUTABLE=server
 
