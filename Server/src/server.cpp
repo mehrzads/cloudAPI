@@ -12,6 +12,10 @@
 #include <utility>
 #include "common.h"
 #include "compression.h"
+#include "cloudmessage.pb.h" 
+using namespace std;
+using namespace cloudmessaging;
+allocMessage getAllocPacket;
 
 
 
@@ -95,9 +99,11 @@ int main(int argc, char *argv[])
       //Read the command index
       memcpyFromCloud(newsockfd, &commandKind, 4);
       int size = 0;
+      int messageSize = 0;
       int count = 0;
       size_t compressedSize;
       size_t outputSize;
+      string message;
       unsigned char * compressedData;
       enum cloudCompressionKind compressionKind;
       std::pair<uint32_t, uint32_t> address;
@@ -105,8 +111,12 @@ int main(int argc, char *argv[])
       switch(commandKind){
 	// Allocating in the memory
 	case AllocCommand:
-	  memcpyFromCloud(newsockfd, command, 4);
+	  memcpyFromCloud(newsockfd, command, 8);
 	  size = command[0];
+	  messageSize = command[1];
+	  memcpyFromCloud(newsockfd, &message, messageSize);
+	  getAllocPacket.ParseFromString(message);
+	  printf("message is received %d\n", getAllocPacket.size());
 	  cloudPtr = malloc(size);
           address = convert64to32(cloudPtr);
           command[0] = address.first;

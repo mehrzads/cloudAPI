@@ -1,9 +1,10 @@
 CC=g++
 CFLAGS=-c -Wall -std=c++11
-LDFLAGS= -lpthread -lz -lsnappy
+LDFLAGS= -lpthread -lz -lsnappy `pkg-config --cflags --libs protobuf` 
 SOURCES= src/client.cpp src/cloud.cpp ../Common/src/compression.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
-INCLUDES= -I. -Iinclude/ -I../Common/include/       
+PB_OBJS = $(shell find ../Common/pb/ -name '*.pb.o')
+OBJECTS=$(SOURCES:.cpp=.o)  $(PB_OBJS) 
+INCLUDES= -I. -Iinclude/ -I../Common/include/  -I../Common/pb     
 
 EXECUTABLE=client
 

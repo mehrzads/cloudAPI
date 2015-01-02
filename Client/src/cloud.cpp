@@ -10,6 +10,10 @@
 #include <utility>
 #include "cloud.h" 
 #include "common.h" 
+#include "cloudmessage.pb.h" 
+using namespace std;
+using namespace cloudmessaging;
+allocMessage getAllocPacket;
 
 uint32_t command[10];
 void error(const char *msg)
@@ -52,9 +56,15 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
 // In return server will reply back 2 bytes:
 // 2 Words: Pointer
 cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
+    getAllocPacket.set_messagetype(AllocCommand);
+    getAllocPacket.set_size(size);
+    string message;
     command[0] = AllocCommand;
     command[1] = size;
-    int n = write(socketID, command, 8);
+    command[2] = message.size();
+    int n = write(socketID, command, 12);
+    if (n < 0) return CloudErrorWrite;
+    n = write(socketID, &message, message.size());
     if (n < 0) return CloudErrorWrite;
     n = read(socketID, command, 8);
     if (n !=8) return CloudErrorRead;
