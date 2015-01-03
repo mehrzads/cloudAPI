@@ -2,13 +2,27 @@
 syntax = "proto2";
 package cloudmessaging;
 
-message commonMessage{
-  required int32 messageType = 1;
+message CommonMessage{
+  required int32 messagetype = 1;
 }
 
 
-message allocMessage {
-  required int32 messageType = 1 [default = 0];
+message SizeMessage {
+  required int32 messagetype = 1;
   required int32 size = 2;
+}
+
+message PointerMessage {
+  required int32 messagetype = 1;
+  required int64 pointer = 2;
+}
+
+
+message TransferMessage {
+  required int32 messagetype = 1;
+  required int32 compresskind = 2;
+  required int32 size = 3;
+  required int32 compressedsize = 4;
+  required int64 pointer = 5;
 }
 

@@ -13,9 +13,13 @@
 #include "cloudmessage.pb.h" 
 using namespace std;
 using namespace cloudmessaging;
-allocMessage getAllocPacket;
 
-uint32_t command[10];
+PointerMessage pointerMessage;
+SizeMessage sizeMessage;
+TransferMessage transferMessage;
+string message;
+
+char command[1000];
 void error(const char *msg)
 {
     perror(msg);
@@ -49,6 +53,39 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
     return CloudSuccess;
 }
 
+cloudError_t sendMessage(int socketID, string message){
+    int n = write(socketID, command, 4);
+    if (n < 0) return CloudErrorWrite;
+    n = write(socketID, message.c_str(), message.size());
+    if (n < 0) return CloudErrorWrite;
+    return CloudSuccess;
+}
+
+cloudError_t recMessage(int socketID, string &message){
+    int messageSize = 0;
+    int n = read(socketID, &messageSize, 4);
+    if (n !=4) return CloudErrorRead;
+    n = write(socketID, command, messageSize);
+    if (n < 0) return CloudErrorWrite;
+    message = string(command);
+    return CloudSuccess;
+}
+
+cloudError_t sendData(int socketID, const void * data, size_t size){
+      int n = write(socketID, data, size);
+      if (n < 0) return CloudErrorWrite;
+      return CloudSuccess;
+}
+
+cloudError_t recData(int socketID, void * data, size_t size){
+      unsigned int sent = 0;
+      while (sent < size){
+	int n = read(socketID, data + sent, size - sent);
+	sent += n;
+	if (n < 0) return CloudErrorRead;
+      }
+      return CloudSuccess;
+}
 // Allocating an array with size in the server. 
 // Cloudptr is the pointer that is allocated on the server
 // Command which is send to the server:
@@ -56,79 +93,49 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
 // In return server will reply back 2 bytes:
 // 2 Words: Pointer
 cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
-    getAllocPacket.set_messagetype(AllocCommand);
-    getAllocPacket.set_size(size);
-    string message;
-    command[0] = AllocCommand;
-    command[1] = size;
-    command[2] = message.size();
-    int n = write(socketID, command, 12);
-    if (n < 0) return CloudErrorWrite;
-    n = write(socketID, &message, message.size());
-    if (n < 0) return CloudErrorWrite;
-    n = read(socketID, command, 8);
-    if (n !=8) return CloudErrorRead;
-    *cloudPtr =  (void *) ((((long int)command[0]) <<32) | command[1]);
+    sizeMessage.set_messagetype(AllocCommand);
+    sizeMessage.set_size(size);
+    sizeMessage.SerializeToString(&message);
+    sendMessage(socketID, message);
+    recMessage(socketID, message);
+    pointerMessage.ParseFromString(message);
+    *cloudPtr =  (void *) (pointerMessage.pointer());
     return CloudSuccess;
 }
 
 // cloudMemcpy is transferring data between client and the server
-// It has 4 different cases:
-// compressed, ToServer
-// compressed, FromServer
-// nonCompressed, ToServer
-// nonCompressed, FromServer 
 cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t  count,   enum cloudMemcpyKind	 directionKind, enum cloudCompressionKind compressKind){
  
   if (compressKind != NoCompression){
-    //compressed, ToServer
-    // Command which is send to the server:
-    // 5 words: CmdIndex, count, compressedSize, pointer
-    // Then client will send the data to the server
-    // compressedSize words
     if (directionKind == cloudMemcpyClientToCloud) {
       size_t compressedSize= getMaxLength( count, compressKind); 
       unsigned char * out  = (unsigned char *) malloc(compressedSize);
       compress((const unsigned char *)src, count, out, compressedSize, 1, compressKind);
-      command[0] = GetCompressedCommand;
-      command[1] = compressKind;
-      command[2] =  count;
-      command[3] =  compressedSize;
-      std::pair<uint32_t, uint32_t> address = convert64to32(dst);
-      command[4] = address.first;
-      command[5] = address.second;
-      int n = write(socketID, command, 24);
-      if (n < 0) return CloudErrorWrite;
-      n = write(socketID, out, compressedSize);
-      if (n < 0) return CloudErrorWrite;
+
+      transferMessage.set_messagetype(GetCommand);
+      transferMessage.set_compresskind(compressKind);
+      transferMessage.set_size(count);
+      transferMessage.set_compressedsize(compressedSize);
+      transferMessage.set_pointer((int64_t)dst);
+      transferMessage.SerializeToString(&message);
+      sendMessage(socketID, message);
+      sendData(socketID, out, compressedSize);
+
       free(out);
     }    
-    //compressed, FromServer
-    // Command which is send to the server:
-    // 4 words: CmdIndex, count, pointer
-    // Then server will reply back with the compressedSize
-    // Then client will receive the data to the server
-    // compressedSize words
     else if (directionKind == cloudMemcpyCloudToClient) {
-      // TODO:This can be improved
-      command[0] = SendCompressedCommand;
-      command[1] = compressKind;
-      command[2] = count;
-      std::pair<uint32_t, uint32_t> address = convert64to32(src);
-      command[3] = address.first;
-      command[4] = address.second;
-      int n = write(socketID, command, 20);
-      if (n < 0) return CloudErrorWrite;
-      n = read(socketID, command, 4);
-      if (n < 0) return CloudErrorRead;
-      size_t compressedSize = command[0]; 
-      unsigned int sent = 0;
+      transferMessage.set_messagetype(SendCommand);
+      transferMessage.set_compresskind(compressKind);
+      transferMessage.set_size(count);
+      transferMessage.set_compressedsize(0);
+      transferMessage.set_pointer((int64_t)src);
+      transferMessage.SerializeToString(&message);
+      sendMessage(socketID, message);
+      recMessage(socketID, message);
+      sizeMessage.ParseFromString(message);
+      size_t compressedSize =  (size_t)sizeMessage.size();
       unsigned char * out  = (unsigned char *) malloc(compressedSize * sizeof(char));
-      while (sent < compressedSize){
-	n = read(socketID, out + sent, compressedSize - sent);
-	sent += n;
-	if (n < 0) return CloudErrorRead;
-      }
+      recData(socketID, out, compressedSize);
       decompress(out, compressedSize, (unsigned char *)dst, count, compressKind);
       free(out);
     }
@@ -141,15 +148,14 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
     // Then client will send the data to the server
     // count words
     if (directionKind == cloudMemcpyClientToCloud) {
-      command[0] = GetCommand;
-      command[1] =  count;
-      std::pair<uint32_t, uint32_t> address = convert64to32(dst);
-      command[2] = address.first;
-      command[3] = address.second;
-      int n = write(socketID, command, 16);
-      if (n < 0) return CloudErrorWrite;
-      n = write(socketID, src, count);
-      if (n < 0) return CloudErrorWrite;
+      transferMessage.set_messagetype(GetCommand);
+      transferMessage.set_compresskind(NoCompression);
+      transferMessage.set_size(count);
+      transferMessage.set_compressedsize(0);
+      transferMessage.set_pointer((int64_t)dst);
+      transferMessage.SerializeToString(&message);
+      sendMessage(socketID, message);
+      sendData(socketID, src, count);
     }  
 
     // Uncompressed, FromServer
@@ -158,19 +164,14 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
     // Then client will receive the data to the server
     // count words
     else if (directionKind == cloudMemcpyCloudToClient) {
-      command[0] = SendCommand;
-      command[1] = count;
-      std::pair<uint32_t, uint32_t> address = convert64to32(src);
-      command[2] = address.first;
-      command[3] = address.second;
-      int n = write(socketID, command, 16);
-      if (n < 0) return CloudErrorWrite;
-      unsigned int sent = 0;
-      while (sent < count){
-	n = read(socketID, dst + sent, count - sent);
-	sent += n;
-	if (n < 0) return CloudErrorRead;
-      }
+      transferMessage.set_messagetype(SendCommand);
+      transferMessage.set_compresskind(NoCompression);
+      transferMessage.set_size(count);
+      transferMessage.set_compressedsize(0);
+      transferMessage.set_pointer((int64_t)src);
+      transferMessage.SerializeToString(&message);
+      sendMessage(socketID, message);
+      recData(socketID, dst, count);
     }
   }
   return CloudSuccess;
@@ -178,22 +179,18 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
 
 // Freeing the array on the cloud
 cloudError_t cloudFree(int socketID, void * cloudPtr){
-    command[0] = FreeCommand;
-    std::pair<uint32_t, uint32_t> address = convert64to32(cloudPtr);
-    command[1] = address.first;
-    command[2] = address.second;
-    int n = write(socketID, command, 12);
-    if (n < 0) return CloudErrorWrite;
-    return CloudSuccess;
+    pointerMessage.set_messagetype(FreeCommand);
+    pointerMessage.set_pointer((int64_t)(cloudPtr));
+    pointerMessage.SerializeToString(&message);
+    return sendMessage(socketID, message);
 }
 
 // Finishing the connection
 cloudError_t cloudFinish( int socketID){
-    command[0] = CloseCommand;
-    int n = write(socketID, command, 4);
-    if (n < 0) return CloudErrorWrite;
+    sizeMessage.set_messagetype(CloseCommand);
+    sizeMessage.SerializeToString(&message);
     close(socketID);
-    return CloudSuccess;
+    return sendMessage(socketID, message);
 }
 
 

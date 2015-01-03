@@ -36,19 +36,21 @@ void protobuf_AddDesc_cloudmessage_2eproto();
 void protobuf_AssignDesc_cloudmessage_2eproto();
 void protobuf_ShutdownFile_cloudmessage_2eproto();
 
-class commonMessage;
-class allocMessage;
+class CommonMessage;
+class SizeMessage;
+class PointerMessage;
+class TransferMessage;
 
 // ===================================================================
 
-class commonMessage : public ::google::protobuf::Message {
+class CommonMessage : public ::google::protobuf::Message {
  public:
-  commonMessage();
-  virtual ~commonMessage();
+  CommonMessage();
+  virtual ~CommonMessage();
 
-  commonMessage(const commonMessage& from);
+  CommonMessage(const CommonMessage& from);
 
-  inline commonMessage& operator=(const commonMessage& from) {
+  inline CommonMessage& operator=(const CommonMessage& from) {
     CopyFrom(from);
     return *this;
   }
@@ -62,19 +64,19 @@ class commonMessage : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const commonMessage& default_instance();
+  static const CommonMessage& default_instance();
 
-  void Swap(commonMessage* other);
+  void Swap(CommonMessage* other);
 
   // implements Message ----------------------------------------------
 
-  inline commonMessage* New() const { return New(NULL); }
+  inline CommonMessage* New() const { return New(NULL); }
 
-  commonMessage* New(::google::protobuf::Arena* arena) const;
+  CommonMessage* New(::google::protobuf::Arena* arena) const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const commonMessage& from);
-  void MergeFrom(const commonMessage& from);
+  void CopyFrom(const CommonMessage& from);
+  void MergeFrom(const CommonMessage& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -89,7 +91,7 @@ class commonMessage : public ::google::protobuf::Message {
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const;
-  void InternalSwap(commonMessage* other);
+  void InternalSwap(CommonMessage* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return _internal_metadata_.arena();
@@ -105,14 +107,14 @@ class commonMessage : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int32 messageType = 1;
+  // required int32 messagetype = 1;
   inline bool has_messagetype() const;
   inline void clear_messagetype();
-  static const int kMessageTypeFieldNumber = 1;
+  static const int kMessagetypeFieldNumber = 1;
   inline ::google::protobuf::int32 messagetype() const;
   inline void set_messagetype(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:cloudmessaging.commonMessage)
+  // @@protoc_insertion_point(class_scope:cloudmessaging.CommonMessage)
  private:
   inline void set_has_messagetype();
   inline void clear_has_messagetype();
@@ -126,18 +128,18 @@ class commonMessage : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_cloudmessage_2eproto();
 
   void InitAsDefaultInstance();
-  static commonMessage* default_instance_;
+  static CommonMessage* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class allocMessage : public ::google::protobuf::Message {
+class SizeMessage : public ::google::protobuf::Message {
  public:
-  allocMessage();
-  virtual ~allocMessage();
+  SizeMessage();
+  virtual ~SizeMessage();
 
-  allocMessage(const allocMessage& from);
+  SizeMessage(const SizeMessage& from);
 
-  inline allocMessage& operator=(const allocMessage& from) {
+  inline SizeMessage& operator=(const SizeMessage& from) {
     CopyFrom(from);
     return *this;
   }
@@ -151,19 +153,19 @@ class allocMessage : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const allocMessage& default_instance();
+  static const SizeMessage& default_instance();
 
-  void Swap(allocMessage* other);
+  void Swap(SizeMessage* other);
 
   // implements Message ----------------------------------------------
 
-  inline allocMessage* New() const { return New(NULL); }
+  inline SizeMessage* New() const { return New(NULL); }
 
-  allocMessage* New(::google::protobuf::Arena* arena) const;
+  SizeMessage* New(::google::protobuf::Arena* arena) const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const allocMessage& from);
-  void MergeFrom(const allocMessage& from);
+  void CopyFrom(const SizeMessage& from);
+  void MergeFrom(const SizeMessage& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -178,7 +180,7 @@ class allocMessage : public ::google::protobuf::Message {
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const;
-  void InternalSwap(allocMessage* other);
+  void InternalSwap(SizeMessage* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return _internal_metadata_.arena();
@@ -194,10 +196,10 @@ class allocMessage : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int32 messageType = 1 [default = 0];
+  // required int32 messagetype = 1;
   inline bool has_messagetype() const;
   inline void clear_messagetype();
-  static const int kMessageTypeFieldNumber = 1;
+  static const int kMessagetypeFieldNumber = 1;
   inline ::google::protobuf::int32 messagetype() const;
   inline void set_messagetype(::google::protobuf::int32 value);
 
@@ -208,7 +210,7 @@ class allocMessage : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 size() const;
   inline void set_size(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:cloudmessaging.allocMessage)
+  // @@protoc_insertion_point(class_scope:cloudmessaging.SizeMessage)
  private:
   inline void set_has_messagetype();
   inline void clear_has_messagetype();
@@ -228,89 +230,499 @@ class allocMessage : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_cloudmessage_2eproto();
 
   void InitAsDefaultInstance();
-  static allocMessage* default_instance_;
+  static SizeMessage* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PointerMessage : public ::google::protobuf::Message {
+ public:
+  PointerMessage();
+  virtual ~PointerMessage();
+
+  PointerMessage(const PointerMessage& from);
+
+  inline PointerMessage& operator=(const PointerMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields();
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PointerMessage& default_instance();
+
+  void Swap(PointerMessage* other);
+
+  // implements Message ----------------------------------------------
+
+  inline PointerMessage* New() const { return New(NULL); }
+
+  PointerMessage* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PointerMessage& from);
+  void MergeFrom(const PointerMessage& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(PointerMessage* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 messagetype = 1;
+  inline bool has_messagetype() const;
+  inline void clear_messagetype();
+  static const int kMessagetypeFieldNumber = 1;
+  inline ::google::protobuf::int32 messagetype() const;
+  inline void set_messagetype(::google::protobuf::int32 value);
+
+  // required int64 pointer = 2;
+  inline bool has_pointer() const;
+  inline void clear_pointer();
+  static const int kPointerFieldNumber = 2;
+  inline ::google::protobuf::int64 pointer() const;
+  inline void set_pointer(::google::protobuf::int64 value);
+
+  // @@protoc_insertion_point(class_scope:cloudmessaging.PointerMessage)
+ private:
+  inline void set_has_messagetype();
+  inline void clear_has_messagetype();
+  inline void set_has_pointer();
+  inline void clear_has_pointer();
+
+  // helper for ByteSize()
+  int RequiredFieldsByteSizeFallback() const;
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::google::protobuf::int64 pointer_;
+  ::google::protobuf::int32 messagetype_;
+  friend void  protobuf_AddDesc_cloudmessage_2eproto();
+  friend void protobuf_AssignDesc_cloudmessage_2eproto();
+  friend void protobuf_ShutdownFile_cloudmessage_2eproto();
+
+  void InitAsDefaultInstance();
+  static PointerMessage* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class TransferMessage : public ::google::protobuf::Message {
+ public:
+  TransferMessage();
+  virtual ~TransferMessage();
+
+  TransferMessage(const TransferMessage& from);
+
+  inline TransferMessage& operator=(const TransferMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields();
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TransferMessage& default_instance();
+
+  void Swap(TransferMessage* other);
+
+  // implements Message ----------------------------------------------
+
+  inline TransferMessage* New() const { return New(NULL); }
+
+  TransferMessage* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TransferMessage& from);
+  void MergeFrom(const TransferMessage& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(TransferMessage* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 messagetype = 1;
+  inline bool has_messagetype() const;
+  inline void clear_messagetype();
+  static const int kMessagetypeFieldNumber = 1;
+  inline ::google::protobuf::int32 messagetype() const;
+  inline void set_messagetype(::google::protobuf::int32 value);
+
+  // required int32 compresskind = 2;
+  inline bool has_compresskind() const;
+  inline void clear_compresskind();
+  static const int kCompresskindFieldNumber = 2;
+  inline ::google::protobuf::int32 compresskind() const;
+  inline void set_compresskind(::google::protobuf::int32 value);
+
+  // required int32 size = 3;
+  inline bool has_size() const;
+  inline void clear_size();
+  static const int kSizeFieldNumber = 3;
+  inline ::google::protobuf::int32 size() const;
+  inline void set_size(::google::protobuf::int32 value);
+
+  // required int32 compressedsize = 4;
+  inline bool has_compressedsize() const;
+  inline void clear_compressedsize();
+  static const int kCompressedsizeFieldNumber = 4;
+  inline ::google::protobuf::int32 compressedsize() const;
+  inline void set_compressedsize(::google::protobuf::int32 value);
+
+  // required int64 pointer = 5;
+  inline bool has_pointer() const;
+  inline void clear_pointer();
+  static const int kPointerFieldNumber = 5;
+  inline ::google::protobuf::int64 pointer() const;
+  inline void set_pointer(::google::protobuf::int64 value);
+
+  // @@protoc_insertion_point(class_scope:cloudmessaging.TransferMessage)
+ private:
+  inline void set_has_messagetype();
+  inline void clear_has_messagetype();
+  inline void set_has_compresskind();
+  inline void clear_has_compresskind();
+  inline void set_has_size();
+  inline void clear_has_size();
+  inline void set_has_compressedsize();
+  inline void clear_has_compressedsize();
+  inline void set_has_pointer();
+  inline void clear_has_pointer();
+
+  // helper for ByteSize()
+  int RequiredFieldsByteSizeFallback() const;
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::google::protobuf::int32 messagetype_;
+  ::google::protobuf::int32 compresskind_;
+  ::google::protobuf::int32 size_;
+  ::google::protobuf::int32 compressedsize_;
+  ::google::protobuf::int64 pointer_;
+  friend void  protobuf_AddDesc_cloudmessage_2eproto();
+  friend void protobuf_AssignDesc_cloudmessage_2eproto();
+  friend void protobuf_ShutdownFile_cloudmessage_2eproto();
+
+  void InitAsDefaultInstance();
+  static TransferMessage* default_instance_;
 };
 // ===================================================================
 
 
 // ===================================================================
 
-// commonMessage
+// CommonMessage
 
-// required int32 messageType = 1;
-inline bool commonMessage::has_messagetype() const {
+// required int32 messagetype = 1;
+inline bool CommonMessage::has_messagetype() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void commonMessage::set_has_messagetype() {
+inline void CommonMessage::set_has_messagetype() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void commonMessage::clear_has_messagetype() {
+inline void CommonMessage::clear_has_messagetype() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void commonMessage::clear_messagetype() {
+inline void CommonMessage::clear_messagetype() {
   messagetype_ = 0;
   clear_has_messagetype();
 }
-inline ::google::protobuf::int32 commonMessage::messagetype() const {
-  // @@protoc_insertion_point(field_get:cloudmessaging.commonMessage.messageType)
+inline ::google::protobuf::int32 CommonMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.CommonMessage.messagetype)
   return messagetype_;
 }
-inline void commonMessage::set_messagetype(::google::protobuf::int32 value) {
+inline void CommonMessage::set_messagetype(::google::protobuf::int32 value) {
   set_has_messagetype();
   messagetype_ = value;
-  // @@protoc_insertion_point(field_set:cloudmessaging.commonMessage.messageType)
+  // @@protoc_insertion_point(field_set:cloudmessaging.CommonMessage.messagetype)
 }
 
 // -------------------------------------------------------------------
 
-// allocMessage
+// SizeMessage
 
-// required int32 messageType = 1 [default = 0];
-inline bool allocMessage::has_messagetype() const {
+// required int32 messagetype = 1;
+inline bool SizeMessage::has_messagetype() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void allocMessage::set_has_messagetype() {
+inline void SizeMessage::set_has_messagetype() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void allocMessage::clear_has_messagetype() {
+inline void SizeMessage::clear_has_messagetype() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void allocMessage::clear_messagetype() {
+inline void SizeMessage::clear_messagetype() {
   messagetype_ = 0;
   clear_has_messagetype();
 }
-inline ::google::protobuf::int32 allocMessage::messagetype() const {
-  // @@protoc_insertion_point(field_get:cloudmessaging.allocMessage.messageType)
+inline ::google::protobuf::int32 SizeMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.SizeMessage.messagetype)
   return messagetype_;
 }
-inline void allocMessage::set_messagetype(::google::protobuf::int32 value) {
+inline void SizeMessage::set_messagetype(::google::protobuf::int32 value) {
   set_has_messagetype();
   messagetype_ = value;
-  // @@protoc_insertion_point(field_set:cloudmessaging.allocMessage.messageType)
+  // @@protoc_insertion_point(field_set:cloudmessaging.SizeMessage.messagetype)
 }
 
 // required int32 size = 2;
-inline bool allocMessage::has_size() const {
+inline bool SizeMessage::has_size() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void allocMessage::set_has_size() {
+inline void SizeMessage::set_has_size() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void allocMessage::clear_has_size() {
+inline void SizeMessage::clear_has_size() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void allocMessage::clear_size() {
+inline void SizeMessage::clear_size() {
   size_ = 0;
   clear_has_size();
 }
-inline ::google::protobuf::int32 allocMessage::size() const {
-  // @@protoc_insertion_point(field_get:cloudmessaging.allocMessage.size)
+inline ::google::protobuf::int32 SizeMessage::size() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.SizeMessage.size)
   return size_;
 }
-inline void allocMessage::set_size(::google::protobuf::int32 value) {
+inline void SizeMessage::set_size(::google::protobuf::int32 value) {
   set_has_size();
   size_ = value;
-  // @@protoc_insertion_point(field_set:cloudmessaging.allocMessage.size)
+  // @@protoc_insertion_point(field_set:cloudmessaging.SizeMessage.size)
+}
+
+// -------------------------------------------------------------------
+
+// PointerMessage
+
+// required int32 messagetype = 1;
+inline bool PointerMessage::has_messagetype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void PointerMessage::set_has_messagetype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void PointerMessage::clear_has_messagetype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void PointerMessage::clear_messagetype() {
+  messagetype_ = 0;
+  clear_has_messagetype();
+}
+inline ::google::protobuf::int32 PointerMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.PointerMessage.messagetype)
+  return messagetype_;
+}
+inline void PointerMessage::set_messagetype(::google::protobuf::int32 value) {
+  set_has_messagetype();
+  messagetype_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.PointerMessage.messagetype)
+}
+
+// required int64 pointer = 2;
+inline bool PointerMessage::has_pointer() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void PointerMessage::set_has_pointer() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void PointerMessage::clear_has_pointer() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void PointerMessage::clear_pointer() {
+  pointer_ = GOOGLE_LONGLONG(0);
+  clear_has_pointer();
+}
+inline ::google::protobuf::int64 PointerMessage::pointer() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.PointerMessage.pointer)
+  return pointer_;
+}
+inline void PointerMessage::set_pointer(::google::protobuf::int64 value) {
+  set_has_pointer();
+  pointer_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.PointerMessage.pointer)
+}
+
+// -------------------------------------------------------------------
+
+// TransferMessage
+
+// required int32 messagetype = 1;
+inline bool TransferMessage::has_messagetype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TransferMessage::set_has_messagetype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TransferMessage::clear_has_messagetype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TransferMessage::clear_messagetype() {
+  messagetype_ = 0;
+  clear_has_messagetype();
+}
+inline ::google::protobuf::int32 TransferMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.messagetype)
+  return messagetype_;
+}
+inline void TransferMessage::set_messagetype(::google::protobuf::int32 value) {
+  set_has_messagetype();
+  messagetype_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.messagetype)
+}
+
+// required int32 compresskind = 2;
+inline bool TransferMessage::has_compresskind() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TransferMessage::set_has_compresskind() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TransferMessage::clear_has_compresskind() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TransferMessage::clear_compresskind() {
+  compresskind_ = 0;
+  clear_has_compresskind();
+}
+inline ::google::protobuf::int32 TransferMessage::compresskind() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.compresskind)
+  return compresskind_;
+}
+inline void TransferMessage::set_compresskind(::google::protobuf::int32 value) {
+  set_has_compresskind();
+  compresskind_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.compresskind)
+}
+
+// required int32 size = 3;
+inline bool TransferMessage::has_size() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TransferMessage::set_has_size() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TransferMessage::clear_has_size() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TransferMessage::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+inline ::google::protobuf::int32 TransferMessage::size() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.size)
+  return size_;
+}
+inline void TransferMessage::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.size)
+}
+
+// required int32 compressedsize = 4;
+inline bool TransferMessage::has_compressedsize() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void TransferMessage::set_has_compressedsize() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void TransferMessage::clear_has_compressedsize() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void TransferMessage::clear_compressedsize() {
+  compressedsize_ = 0;
+  clear_has_compressedsize();
+}
+inline ::google::protobuf::int32 TransferMessage::compressedsize() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.compressedsize)
+  return compressedsize_;
+}
+inline void TransferMessage::set_compressedsize(::google::protobuf::int32 value) {
+  set_has_compressedsize();
+  compressedsize_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.compressedsize)
+}
+
+// required int64 pointer = 5;
+inline bool TransferMessage::has_pointer() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void TransferMessage::set_has_pointer() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void TransferMessage::clear_has_pointer() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void TransferMessage::clear_pointer() {
+  pointer_ = GOOGLE_LONGLONG(0);
+  clear_has_pointer();
+}
+inline ::google::protobuf::int64 TransferMessage::pointer() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.pointer)
+  return pointer_;
+}
+inline void TransferMessage::set_pointer(::google::protobuf::int64 value) {
+  set_has_pointer();
+  pointer_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.pointer)
 }
 
 

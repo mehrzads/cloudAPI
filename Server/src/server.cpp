@@ -15,7 +15,14 @@
 #include "cloudmessage.pb.h" 
 using namespace std;
 using namespace cloudmessaging;
-allocMessage getAllocPacket;
+using namespace google::protobuf;
+
+PointerMessage pointerMessage;
+SizeMessage sizeMessage;
+TransferMessage transferMessage;
+CommonMessage baseMessage;
+string message;
+char command[1000];
 
 
 
@@ -56,30 +63,39 @@ int intitializeSocket(int portno, int &sockfd){
     
 }
 
-// Transferring to the client
-bool memcpyToCloud(int sockfd, const void * src, size_t count){
 
-    int n = write(sockfd, src, count);
-    if (n < 0){ 
-         error("ERROR writing to socket");
-	 return false;
-    }
-    return true;
+cloudError_t sendMessage(int socketID, string message){
+    int n = write(socketID, command, 4);
+    if (n < 0) return CloudErrorWrite;
+    n = write(socketID, message.c_str(), message.size());
+    if (n < 0) return CloudErrorWrite;
+    return CloudSuccess;
 }
 
+cloudError_t recMessage(int socketID, string &message){
+    int messageSize = 0;
+    int n = read(socketID, &messageSize, 4);
+    if (n !=4) return CloudErrorRead;
+    n = write(socketID, command, messageSize);
+    if (n < 0) return CloudErrorWrite;
+    message = string(command);
+    return CloudSuccess;
+}
 
-// Transferring from the client
-bool memcpyFromCloud(int sockfd, void * dst,  size_t count){
-    unsigned int sent = 0;
-    while(sent < count){
-      int n = read(sockfd, dst + sent, count - sent);
-      sent += n;
-      if (n < 0){ 
-	error("ERROR reading from socket");
-	 return false;
+cloudError_t sendData(int socketID, const void * data, size_t size){
+      int n = write(socketID, data, size);
+      if (n < 0) return CloudErrorWrite;
+      return CloudSuccess;
+}
+
+cloudError_t recData(int socketID, void * data, size_t size){
+      unsigned int sent = 0;
+      while (sent < size){
+	int n = read(socketID, data + sent, size - sent);
+	sent += n;
+	if (n < 0) return CloudErrorRead;
       }
-    }
-    return true;
+      return CloudSuccess;
 }
 
 
@@ -91,86 +107,64 @@ int main(int argc, char *argv[])
         exit(1);
     }
     portno = atoi(argv[1]);
-    uint32_t command[10];
     newsockfd = intitializeSocket(portno, sockfd);
     bool done = false;
     while(!done){
-      cloudCommandKind commandKind;
-      //Read the command index
-      memcpyFromCloud(newsockfd, &commandKind, 4);
-      int size = 0;
-      int messageSize = 0;
-      int count = 0;
+      recMessage(newsockfd, message);
+      baseMessage.ParseFromString(message);
+      int commandKind = baseMessage.messagetype();
+      void * cloudPtr;
       size_t compressedSize;
       size_t outputSize;
-      string message;
       unsigned char * compressedData;
-      enum cloudCompressionKind compressionKind;
       std::pair<uint32_t, uint32_t> address;
-      void * cloudPtr;
       switch(commandKind){
 	// Allocating in the memory
 	case AllocCommand:
-	  memcpyFromCloud(newsockfd, command, 8);
-	  size = command[0];
-	  messageSize = command[1];
-	  memcpyFromCloud(newsockfd, &message, messageSize);
-	  getAllocPacket.ParseFromString(message);
-	  printf("message is received %d\n", getAllocPacket.size());
-	  cloudPtr = malloc(size);
-          address = convert64to32(cloudPtr);
-          command[0] = address.first;
-          command[1] = address.second;
-	  memcpyToCloud(newsockfd, command, 8);
+          sizeMessage.ParseFromString(message);
+	  cloudPtr = malloc(sizeMessage.size());
+	  pointerMessage.set_messagetype(PointerCommand);
+	  pointerMessage.set_pointer((int64_t)(cloudPtr));
+	  pointerMessage.SerializeToString(&message);
+	  sendMessage(newsockfd, message);
 	  break;
 	// Recieving the data from the client  
 	case GetCommand:
-	  memcpyFromCloud(newsockfd, command, 12);
-	  count = command[0];
-	  cloudPtr =  (void *) ((((long int)command[1]) <<32) | command[2]);
-	  memcpyFromCloud(newsockfd, cloudPtr, count);
+          transferMessage.ParseFromString(message);
+	  if (transferMessage.compresskind() == NoCompression)
+	    recData(newsockfd, (void *) transferMessage.pointer(),  transferMessage.size());
+	  else{
+	    compressedData = (unsigned char * )malloc(transferMessage.compressedsize());
+	    if (!compressedData) printf("Allocation is NULL\n");	     
+	    recData(newsockfd, (void *) compressedData,   transferMessage.compressedsize());
+	    outputSize = (size_t)(transferMessage.size());
+	    decompress(compressedData, transferMessage.compressedsize(), (unsigned char *)transferMessage.pointer(), outputSize, (cloudCompressionKind)transferMessage.compresskind());
+	    free(compressedData);
+	  }
+	      
 	  break;
 	// Sending data to the client  
 	case SendCommand:
-	  memcpyFromCloud(newsockfd, command, 12);
-	  count = command[0];
-	  cloudPtr =  (void *) ((((long int)command[1]) <<32) | command[2]);
-	  memcpyToCloud(newsockfd, cloudPtr, count);
-	  break;
-	// Recieving the compressed data from the client  
-	case GetCompressedCommand:
-	  memcpyFromCloud(newsockfd, command, 20);
-	  compressionKind  = static_cast<cloudCompressionKind>(command[0]);
-	  count = command[1];
-	  compressedSize = command[2];
-	  cloudPtr =  (void *) ((((long int)command[3]) <<32) | command[4]);
-	  compressedData = (unsigned char * )malloc(compressedSize);
-	  if (!compressedData) printf("Allocation is NULL\n");	
-	  memcpyFromCloud(newsockfd, (void *) compressedData, compressedSize);
-	  outputSize = (size_t)count;
-	  decompress(compressedData, compressedSize, (unsigned char *)cloudPtr, outputSize, compressionKind);
-	  free(compressedData);
-	  break;
-	// Sending compressed data to the client  
-	case SendCompressedCommand:
-	  memcpyFromCloud(newsockfd, command, 16);
-	  compressionKind  = static_cast<cloudCompressionKind>(command[0]);
-	  count = command[1];
-	  cloudPtr =  (void *) ((((long int)command[2]) <<32) | command[3]);
-	  compressedSize = getMaxLength(count, compressionKind);
-	  compressedData = (unsigned char * )malloc(compressedSize);
-	  compress((unsigned char *)cloudPtr, count, compressedData, compressedSize, 1, compressionKind);
-	  if (!compressedData) printf("Allocation is NULL\n");	
-	  command[0] = compressedSize;
-	  memcpyToCloud(newsockfd, command, 4);
-	  memcpyToCloud(newsockfd, compressedData, compressedSize);
-	  free(compressedData);
+          transferMessage.ParseFromString(message);
+	  if (transferMessage.compresskind() == NoCompression)
+	    sendData(newsockfd, (void *) transferMessage.pointer(),  transferMessage.size());
+	  else{
+	    compressedSize = getMaxLength(transferMessage.size(), (cloudCompressionKind)transferMessage.compresskind());
+	    compressedData = (unsigned char * )malloc(compressedSize);
+	    if (!compressedData) printf("Allocation is NULL\n");	
+	    compress((unsigned char *)transferMessage.pointer(), (size_t)transferMessage.size(), compressedData, compressedSize, 1, (cloudCompressionKind)transferMessage.compresskind());
+	    sizeMessage.set_messagetype(SizeCommand);
+	    sizeMessage.set_size(compressedSize);
+	    sizeMessage.SerializeToString(&message);
+	    sendMessage(newsockfd, message);
+	    sendData(newsockfd, compressedData, compressedSize);
+	    free(compressedData);
+	  }
 	  break;
 	// Freeing the memory
 	case FreeCommand:
-	  memcpyFromCloud(newsockfd, command, 8);
-	  cloudPtr =  (void *) ((((long int)command[0]) <<32) | command[1]);
-	  free(cloudPtr);
+          pointerMessage.ParseFromString(message);
+	  free((void *)pointerMessage.pointer());
 	  break;
 	// Closing the connection  
 	case CloseCommand:
