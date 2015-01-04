@@ -53,9 +53,24 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
     return CloudSuccess;
 }
 
+void print(string message){
+  for (int i =0; i < message.size(); i++)
+    printf("%d ", message[i]);
+  printf("\n");
+}
 cloudError_t sendMessage(int socketID, string message){
-    int n = write(socketID, command, 4);
-    if (n < 0) return CloudErrorWrite;
+    print(message);
+    int messageSize = message.size();
+    int n = write(socketID, &messageSize, 4);
+    printf("MessageSize %d\t%d\n",n, messageSize);
+    if (n < 0) 
+    {
+      int k = message.size();
+      n = write(socketID, &k, 4);
+      printf("MessageSize %d\t%d\n",n, k);
+      if (n < 0) 
+	return CloudErrorWrite;
+    }
     n = write(socketID, message.c_str(), message.size());
     if (n < 0) return CloudErrorWrite;
     return CloudSuccess;
@@ -63,11 +78,11 @@ cloudError_t sendMessage(int socketID, string message){
 
 cloudError_t recMessage(int socketID, string &message){
     int messageSize = 0;
-    int n = read(socketID, &messageSize, 4);
+    int n = read(socketID, &messageSize, 4);    
     if (n !=4) return CloudErrorRead;
-    n = write(socketID, command, messageSize);
-    if (n < 0) return CloudErrorWrite;
-    message = string(command);
+    n = read(socketID, command, messageSize);
+    if (n < 0) return CloudErrorRead;
+    message = string(command, messageSize);
     return CloudSuccess;
 }
 
@@ -86,6 +101,7 @@ cloudError_t recData(int socketID, void * data, size_t size){
       }
       return CloudSuccess;
 }
+
 // Allocating an array with size in the server. 
 // Cloudptr is the pointer that is allocated on the server
 // Command which is send to the server:
@@ -96,6 +112,7 @@ cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
     sizeMessage.set_messagetype(AllocCommand);
     sizeMessage.set_size(size);
     sizeMessage.SerializeToString(&message);
+    print(message);
     sendMessage(socketID, message);
     recMessage(socketID, message);
     pointerMessage.ParseFromString(message);
@@ -120,7 +137,6 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.SerializeToString(&message);
       sendMessage(socketID, message);
       sendData(socketID, out, compressedSize);
-
       free(out);
     }    
     else if (directionKind == cloudMemcpyCloudToClient) {
@@ -179,18 +195,23 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
 
 // Freeing the array on the cloud
 cloudError_t cloudFree(int socketID, void * cloudPtr){
+    printf("Free\n");
     pointerMessage.set_messagetype(FreeCommand);
     pointerMessage.set_pointer((int64_t)(cloudPtr));
     pointerMessage.SerializeToString(&message);
+    print(message);
     return sendMessage(socketID, message);
 }
 
 // Finishing the connection
 cloudError_t cloudFinish( int socketID){
+    printf("Close\n");
     sizeMessage.set_messagetype(CloseCommand);
+    sizeMessage.set_size(0);
     sizeMessage.SerializeToString(&message);
+    sendMessage(socketID, message);
     close(socketID);
-    return sendMessage(socketID, message);
+    return CloudSuccess; 
 }
 
 
