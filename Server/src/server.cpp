@@ -32,12 +32,6 @@ void error(const char *msg)
     exit(1);
 }
 
-// Converting pointer to the 4 bytes integers so we can send them to the server
-std::pair<uint32_t, uint32_t> convert64to32(const void * pointer){
-      uint32_t x = (uint32_t)(( ((uint64_t)pointer) & 0xFFFFFFFF00000000) >> 32);
-      uint32_t y = (uint32_t)(((uint64_t)pointer) & 0xFFFFFFFF);
-      return std::make_pair(x,y);
-}
 
 // Initializing the connection
 int intitializeSocket(int portno, int &sockfd){
@@ -63,9 +57,17 @@ int intitializeSocket(int portno, int &sockfd){
     
 }
 
+void print(string message){
+    //	printf("size recieved %d\n", message.size());
+	for (int i = 0; i < message.size(); i++){
+		printf("%d ", message[i]);	
+	}
+	printf("\ns\n");
+}
 
 cloudError_t sendMessage(int socketID, string message){
-    int n = write(socketID, command, 4);
+    int messageSize = message.size();
+    int n = write(socketID, &messageSize, 4);
     if (n < 0) return CloudErrorWrite;
     n = write(socketID, message.c_str(), message.size());
     if (n < 0) return CloudErrorWrite;
@@ -75,10 +77,14 @@ cloudError_t sendMessage(int socketID, string message){
 cloudError_t recMessage(int socketID, string &message){
     int messageSize = 0;
     int n = read(socketID, &messageSize, 4);
-    if (n !=4) return CloudErrorRead;
-    n = write(socketID, command, messageSize);
-    if (n < 0) return CloudErrorWrite;
-    message = string(command);
+    if (n <0) return CloudErrorRead;
+    n = read(socketID, command, messageSize);
+    if (n < 0) return CloudErrorRead;
+	for (int i = 0; i < messageSize; i++){
+		printf("%d ", command[i]);	
+	}
+	printf("\n");
+    message = string(command, messageSize);
     return CloudSuccess;
 }
 
@@ -110,9 +116,12 @@ int main(int argc, char *argv[])
     newsockfd = intitializeSocket(portno, sockfd);
     bool done = false;
     while(!done){
+      printf("Done\n");
       recMessage(newsockfd, message);
+      print(message);
       baseMessage.ParseFromString(message);
       int commandKind = baseMessage.messagetype();
+      printf("Commandkind %d\n", commandKind);
       void * cloudPtr;
       size_t compressedSize;
       size_t outputSize;
@@ -121,6 +130,7 @@ int main(int argc, char *argv[])
       switch(commandKind){
 	// Allocating in the memory
 	case AllocCommand:
+	  printf("Allocate\n");
           sizeMessage.ParseFromString(message);
 	  cloudPtr = malloc(sizeMessage.size());
 	  pointerMessage.set_messagetype(PointerCommand);
@@ -163,11 +173,13 @@ int main(int argc, char *argv[])
 	  break;
 	// Freeing the memory
 	case FreeCommand:
+	  printf("Free\n");
           pointerMessage.ParseFromString(message);
 	  free((void *)pointerMessage.pointer());
 	  break;
 	// Closing the connection  
 	case CloseCommand:
+	  printf("Close\n");
 	  close(newsockfd);
 	  close(sockfd);
 	  done = true;
