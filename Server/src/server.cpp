@@ -57,89 +57,102 @@ int intitializeSocket(int portno, int &sockfd){
     
 }
 
+void handleAllocationMessage(int socketID, string message){
+  sizeMessage.ParseFromString(message);
+  void * cloudPtr = malloc(sizeMessage.size());
+  pointerMessage.set_messagetype(PointerCommand);
+  pointerMessage.set_pointer((int64_t)(cloudPtr));
+  pointerMessage.SerializeToString(&message);
+  sendMessage(socketID, message);
+}
+
+void handleGetMessage(int socketID, string message){
+  transferMessage.ParseFromString(message);
+  if (transferMessage.compresskind() == NoCompression)
+    recData(socketID, (void *) transferMessage.pointer(),  transferMessage.size());
+  else{
+    unsigned char * compressedData = (unsigned char * )malloc(transferMessage.compressedsize());
+    if (!compressedData) printf("Allocation is NULL\n");	     
+    recData(socketID, (void *) compressedData,   transferMessage.compressedsize());
+    size_t outputSize = (size_t)(transferMessage.size());
+    decompress(compressedData, transferMessage.compressedsize(), (unsigned char *)transferMessage.pointer(), outputSize, (cloudCompressionKind)transferMessage.compresskind());
+    free(compressedData);
+  }
+}
+
+void handleSendMessage(int socketID, string message){
+  transferMessage.ParseFromString(message);
+  if (transferMessage.compresskind() == NoCompression)
+    sendData(socketID, (void *) transferMessage.pointer(),  transferMessage.size());
+  else{
+    size_t compressedSize = getMaxLength(transferMessage.size(), (cloudCompressionKind)transferMessage.compresskind());
+    unsigned char *compressedData = (unsigned char * )malloc(compressedSize);
+    if (!compressedData) printf("Allocation is NULL\n");	
+    compress((unsigned char *)transferMessage.pointer(), (size_t)transferMessage.size(), compressedData, compressedSize, 1, (cloudCompressionKind)transferMessage.compresskind());
+    sizeMessage.set_messagetype(SizeCommand);
+    sizeMessage.set_size(compressedSize);
+    sizeMessage.SerializeToString(&message);
+    sendMessage(socketID, message);
+    sendData(socketID, compressedData, compressedSize);
+    free(compressedData);
+  }
+}
+
+
+void handleCloseMessage(int socketID, int soecketID2){
+   close(socketID);
+   close(socketID2);
+}
+
+
+void handleFreeMessage(string message){
+   pointerMessage.ParseFromString(message);
+   free((void *)pointerMessage.pointer());
+}
+
+void monitor(int portno){
+    int sockfd, newsockfd;
+    newsockfd = intitializeSocket(portno, sockfd);
+    bool listen = true;
+    while(listen){
+      recMessage(newsockfd, message);
+      baseMessage.ParseFromString(message);
+      int commandKind = baseMessage.messagetype();
+      switch(commandKind){
+	// Allocating in the memory
+	case AllocCommand:
+	  handleAllocationMessage(newsockfd, message);
+	  break;
+	// Recieving the data from the client  
+	case GetCommand:
+	  handleGetMessage(newsockfd, message);
+	  break;
+	// Sending data to the client  
+	case SendCommand:
+	  handleSendMessage(newsockfd, message);
+	  break;
+	// Freeing the memory
+	case FreeCommand:
+	  handleFreeMessage(string message);
+	  break;
+	// Closing the connection  
+	case CloseCommand:
+	  handleCloseMessage(newsockfd, sockfd);
+	  listen = false;
+	  break;
+      }
+    }
+}
+
 
 
 int main(int argc, char *argv[])
 {
-    int sockfd, newsockfd, portno;
     if (argc < 2) {
         fprintf(stderr,"ERROR, no port provided\n");
         exit(1);
     }
-    portno = atoi(argv[1]);
-    newsockfd = intitializeSocket(portno, sockfd);
-    bool done = false;
-    while(!done){
-      printf("Done\n");
-      recMessage(newsockfd, message);
-      print(message);
-      baseMessage.ParseFromString(message);
-      int commandKind = baseMessage.messagetype();
-      printf("Commandkind %d\n", commandKind);
-      void * cloudPtr;
-      size_t compressedSize;
-      size_t outputSize;
-      unsigned char * compressedData;
-      std::pair<uint32_t, uint32_t> address;
-      switch(commandKind){
-	// Allocating in the memory
-	case AllocCommand:
-	  printf("Allocate\n");
-          sizeMessage.ParseFromString(message);
-	  cloudPtr = malloc(sizeMessage.size());
-	  pointerMessage.set_messagetype(PointerCommand);
-	  pointerMessage.set_pointer((int64_t)(cloudPtr));
-	  pointerMessage.SerializeToString(&message);
-	  sendMessage(newsockfd, message);
-	  break;
-	// Recieving the data from the client  
-	case GetCommand:
-          transferMessage.ParseFromString(message);
-	  if (transferMessage.compresskind() == NoCompression)
-	    recData(newsockfd, (void *) transferMessage.pointer(),  transferMessage.size());
-	  else{
-	    compressedData = (unsigned char * )malloc(transferMessage.compressedsize());
-	    if (!compressedData) printf("Allocation is NULL\n");	     
-	    recData(newsockfd, (void *) compressedData,   transferMessage.compressedsize());
-	    outputSize = (size_t)(transferMessage.size());
-	    decompress(compressedData, transferMessage.compressedsize(), (unsigned char *)transferMessage.pointer(), outputSize, (cloudCompressionKind)transferMessage.compresskind());
-	    free(compressedData);
-	  }
-	      
-	  break;
-	// Sending data to the client  
-	case SendCommand:
-          transferMessage.ParseFromString(message);
-	  if (transferMessage.compresskind() == NoCompression)
-	    sendData(newsockfd, (void *) transferMessage.pointer(),  transferMessage.size());
-	  else{
-	    compressedSize = getMaxLength(transferMessage.size(), (cloudCompressionKind)transferMessage.compresskind());
-	    compressedData = (unsigned char * )malloc(compressedSize);
-	    if (!compressedData) printf("Allocation is NULL\n");	
-	    compress((unsigned char *)transferMessage.pointer(), (size_t)transferMessage.size(), compressedData, compressedSize, 1, (cloudCompressionKind)transferMessage.compresskind());
-	    sizeMessage.set_messagetype(SizeCommand);
-	    sizeMessage.set_size(compressedSize);
-	    sizeMessage.SerializeToString(&message);
-	    sendMessage(newsockfd, message);
-	    sendData(newsockfd, compressedData, compressedSize);
-	    free(compressedData);
-	  }
-	  break;
-	// Freeing the memory
-	case FreeCommand:
-	  printf("Free\n");
-          pointerMessage.ParseFromString(message);
-	  free((void *)pointerMessage.pointer());
-	  break;
-	// Closing the connection  
-	case CloseCommand:
-	  printf("Close\n");
-	  close(newsockfd);
-	  close(sockfd);
-	  done = true;
-	  break;
-      }
-    }
-
+    int portno = atoi(argv[1]);
+    monitor(portno);
     return 0; 
 }

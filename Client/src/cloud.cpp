@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,13 +25,6 @@ void error(const char *msg)
     exit(0);
 }
 
-// Converting pointer to the 4 bytes integers so we can send them to the server
-std::pair<uint32_t, uint32_t> convert64to32(const void * pointer){
-      uint32_t x = (uint32_t)(( ((uint64_t)pointer) & 0xFFFFFFFF00000000) >> 32);
-      uint32_t y = (uint32_t)(((uint64_t)pointer) & 0xFFFFFFFF);
-      return std::make_pair(x,y);
-}
-
 
 // Initializing the connection
 cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
@@ -55,16 +47,10 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
 
 
 // Allocating an array with size in the server. 
-// Cloudptr is the pointer that is allocated on the server
-// Command which is send to the server:
-// 2 words: CmdIndex, Size
-// In return server will reply back 2 bytes:
-// 2 Words: Pointer
 cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
     sizeMessage.set_messagetype(AllocCommand);
     sizeMessage.set_size(size);
     sizeMessage.SerializeToString(&message);
-    print(message);
     sendMessage(socketID, message);
     recMessage(socketID, message);
     pointerMessage.ParseFromString(message);
@@ -87,6 +73,7 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_compressedsize(compressedSize);
       transferMessage.set_pointer((int64_t)dst);
       transferMessage.SerializeToString(&message);
+      
       sendMessage(socketID, message);
       sendData(socketID, out, compressedSize);
       free(out);
@@ -98,8 +85,10 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_compressedsize(0);
       transferMessage.set_pointer((int64_t)src);
       transferMessage.SerializeToString(&message);
+      
       sendMessage(socketID, message);
       recMessage(socketID, message);
+      
       sizeMessage.ParseFromString(message);
       size_t compressedSize =  (size_t)sizeMessage.size();
       unsigned char * out  = (unsigned char *) malloc(compressedSize * sizeof(char));
@@ -109,12 +98,6 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
     }
   }
   else{
-
-    // Uncompressed, ToServer
-    // Command which is send to the server:
-    // 4 words: CmdIndex, count, pointer
-    // Then client will send the data to the server
-    // count words
     if (directionKind == cloudMemcpyClientToCloud) {
       transferMessage.set_messagetype(GetCommand);
       transferMessage.set_compresskind(NoCompression);
@@ -125,12 +108,6 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       sendMessage(socketID, message);
       sendData(socketID, src, count);
     }  
-
-    // Uncompressed, FromServer
-    // Command which is send to the server:
-    // 4 words: CmdIndex, count, pointer
-    // Then client will receive the data to the server
-    // count words
     else if (directionKind == cloudMemcpyCloudToClient) {
       transferMessage.set_messagetype(SendCommand);
       transferMessage.set_compresskind(NoCompression);
@@ -147,7 +124,6 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
 
 // Freeing the array on the cloud
 cloudError_t cloudFree(int socketID, void * cloudPtr){
-    printf("Free\n");
     pointerMessage.set_messagetype(FreeCommand);
     pointerMessage.set_pointer((int64_t)(cloudPtr));
     pointerMessage.SerializeToString(&message);
@@ -157,7 +133,6 @@ cloudError_t cloudFree(int socketID, void * cloudPtr){
 
 // Finishing the connection
 cloudError_t cloudFinish( int socketID){
-    printf("Close\n");
     sizeMessage.set_messagetype(CloseCommand);
     sizeMessage.set_size(0);
     sizeMessage.SerializeToString(&message);
