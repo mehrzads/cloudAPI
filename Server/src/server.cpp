@@ -99,7 +99,7 @@ void handleSendMessage(int socketID, string message){
 }
 
 
-void handleCloseMessage(int socketID, int soecketID2){
+void handleCloseMessage(int socketID, int socketID2){
    close(socketID);
    close(socketID2);
 }
@@ -133,7 +133,7 @@ void monitor(int portno){
 	  break;
 	// Freeing the memory
 	case FreeCommand:
-	  handleFreeMessage(string message);
+	  handleFreeMessage(message);
 	  break;
 	// Closing the connection  
 	case CloseCommand:
