@@ -11,6 +11,7 @@
 #include "cloud.h" 
 #include "common.h" 
 #include "cloudmessage.pb.h" 
+#include "cloudTransfer.h" 
 using namespace std;
 using namespace cloudmessaging;
 
@@ -19,7 +20,6 @@ SizeMessage sizeMessage;
 TransferMessage transferMessage;
 string message;
 
-char command[1000];
 void error(const char *msg)
 {
     perror(msg);
@@ -53,54 +53,6 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
     return CloudSuccess;
 }
 
-void print(string message){
-  for (int i =0; i < message.size(); i++)
-    printf("%d ", message[i]);
-  printf("\n");
-}
-cloudError_t sendMessage(int socketID, string message){
-    print(message);
-    int messageSize = message.size();
-    int n = write(socketID, &messageSize, 4);
-    printf("MessageSize %d\t%d\n",n, messageSize);
-    if (n < 0) 
-    {
-      int k = message.size();
-      n = write(socketID, &k, 4);
-      printf("MessageSize %d\t%d\n",n, k);
-      if (n < 0) 
-	return CloudErrorWrite;
-    }
-    n = write(socketID, message.c_str(), message.size());
-    if (n < 0) return CloudErrorWrite;
-    return CloudSuccess;
-}
-
-cloudError_t recMessage(int socketID, string &message){
-    int messageSize = 0;
-    int n = read(socketID, &messageSize, 4);    
-    if (n !=4) return CloudErrorRead;
-    n = read(socketID, command, messageSize);
-    if (n < 0) return CloudErrorRead;
-    message = string(command, messageSize);
-    return CloudSuccess;
-}
-
-cloudError_t sendData(int socketID, const void * data, size_t size){
-      int n = write(socketID, data, size);
-      if (n < 0) return CloudErrorWrite;
-      return CloudSuccess;
-}
-
-cloudError_t recData(int socketID, void * data, size_t size){
-      unsigned int sent = 0;
-      while (sent < size){
-	int n = read(socketID, data + sent, size - sent);
-	sent += n;
-	if (n < 0) return CloudErrorRead;
-      }
-      return CloudSuccess;
-}
 
 // Allocating an array with size in the server. 
 // Cloudptr is the pointer that is allocated on the server

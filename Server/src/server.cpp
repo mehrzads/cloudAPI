@@ -13,6 +13,7 @@
 #include "common.h"
 #include "compression.h"
 #include "cloudmessage.pb.h" 
+#include "cloudTransfer.h"
 using namespace std;
 using namespace cloudmessaging;
 using namespace google::protobuf;
@@ -22,7 +23,6 @@ SizeMessage sizeMessage;
 TransferMessage transferMessage;
 CommonMessage baseMessage;
 string message;
-char command[1000];
 
 
 
@@ -57,52 +57,6 @@ int intitializeSocket(int portno, int &sockfd){
     
 }
 
-void print(string message){
-    //	printf("size recieved %d\n", message.size());
-	for (int i = 0; i < message.size(); i++){
-		printf("%d ", message[i]);	
-	}
-	printf("\ns\n");
-}
-
-cloudError_t sendMessage(int socketID, string message){
-    int messageSize = message.size();
-    int n = write(socketID, &messageSize, 4);
-    if (n < 0) return CloudErrorWrite;
-    n = write(socketID, message.c_str(), message.size());
-    if (n < 0) return CloudErrorWrite;
-    return CloudSuccess;
-}
-
-cloudError_t recMessage(int socketID, string &message){
-    int messageSize = 0;
-    int n = read(socketID, &messageSize, 4);
-    if (n <0) return CloudErrorRead;
-    n = read(socketID, command, messageSize);
-    if (n < 0) return CloudErrorRead;
-	for (int i = 0; i < messageSize; i++){
-		printf("%d ", command[i]);	
-	}
-	printf("\n");
-    message = string(command, messageSize);
-    return CloudSuccess;
-}
-
-cloudError_t sendData(int socketID, const void * data, size_t size){
-      int n = write(socketID, data, size);
-      if (n < 0) return CloudErrorWrite;
-      return CloudSuccess;
-}
-
-cloudError_t recData(int socketID, void * data, size_t size){
-      unsigned int sent = 0;
-      while (sent < size){
-	int n = read(socketID, data + sent, size - sent);
-	sent += n;
-	if (n < 0) return CloudErrorRead;
-      }
-      return CloudSuccess;
-}
 
 
 int main(int argc, char *argv[])
