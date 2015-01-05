@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
+#include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -17,6 +17,7 @@ using namespace cloudmessaging;
 PointerMessage pointerMessage;
 SizeMessage sizeMessage;
 TransferMessage transferMessage;
+FunctionCallMessage functionCallMessage;
 string message;
 
 void error(const char *msg)
@@ -34,17 +35,25 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
     if (socketID < 0) return CloudErrorOpen;
     server = gethostbyname(hostname);
     if (server == NULL) return CloudErrorNoHost;
-    bzero((char *) &serv_addr, sizeof(serv_addr));
+    bzero(reinterpret_cast<char *>(&serv_addr), sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, 
-         (char *)&serv_addr.sin_addr.s_addr,
+    bcopy(static_cast<char *>(server->h_addr), 
+         reinterpret_cast<char *>(&serv_addr.sin_addr.s_addr),
          server->h_length);
     serv_addr.sin_port = htons(portno);
-    if (connect(socketID,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
+    if (connect(socketID,reinterpret_cast<struct sockaddr *>( &serv_addr),sizeof(serv_addr)) < 0) 
         return CloudErrorConnection;
     return CloudSuccess;
 }
 
+cloudError_t  cloudFunctionCall(int socketID, cloudFunctionKind functionType, std::string argsMessage){
+   functionCallMessage.set_functiontype(functionType);
+   functionCallMessage.ParseFromString(message);
+   sendMessage(socketID, message);
+   sendMessage(socketID, argsMessage);
+   return CloudSuccess;
+
+}
 
 // Allocating an array with size in the server. 
 cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
@@ -54,7 +63,7 @@ cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
     sendMessage(socketID, message);
     recMessage(socketID, message);
     pointerMessage.ParseFromString(message);
-    *cloudPtr =  (void *) (pointerMessage.pointer());
+    *cloudPtr =  reinterpret_cast<void *> (pointerMessage.pointer());
     return CloudSuccess;
 }
 
@@ -64,14 +73,14 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
   if (compressKind != NoCompression){
     if (directionKind == cloudMemcpyClientToCloud) {
       size_t compressedSize= getMaxLength( count, compressKind); 
-      unsigned char * out  = (unsigned char *) malloc(compressedSize);
-      compress((const unsigned char *)src, count, out, compressedSize, 1, compressKind);
+      unsigned char * out  = static_cast<unsigned char *>(malloc(compressedSize));
+      compress(static_cast<const unsigned char *>(src), count, out, compressedSize, 1, compressKind);
 
       transferMessage.set_messagetype(GetCommand);
       transferMessage.set_compresskind(compressKind);
       transferMessage.set_size(count);
       transferMessage.set_compressedsize(compressedSize);
-      transferMessage.set_pointer((int64_t)dst);
+      transferMessage.set_pointer(reinterpret_cast<int64_t>(dst));
       transferMessage.SerializeToString(&message);
       
       sendMessage(socketID, message);
@@ -83,17 +92,17 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_compresskind(compressKind);
       transferMessage.set_size(count);
       transferMessage.set_compressedsize(0);
-      transferMessage.set_pointer((int64_t)src);
+      transferMessage.set_pointer(reinterpret_cast<int64_t>(src));
       transferMessage.SerializeToString(&message);
       
       sendMessage(socketID, message);
       recMessage(socketID, message);
       
       sizeMessage.ParseFromString(message);
-      size_t compressedSize =  (size_t)sizeMessage.size();
-      unsigned char * out  = (unsigned char *) malloc(compressedSize * sizeof(char));
+      size_t compressedSize =  static_cast<size_t>(sizeMessage.size());
+      unsigned char * out  = static_cast<unsigned char *>(malloc(compressedSize * sizeof(char)));
       recData(socketID, out, compressedSize);
-      decompress(out, compressedSize, (unsigned char *)dst, count, compressKind);
+      decompress(out, compressedSize, static_cast<unsigned char *>(dst), count, compressKind);
       free(out);
     }
   }
@@ -103,7 +112,7 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_compresskind(NoCompression);
       transferMessage.set_size(count);
       transferMessage.set_compressedsize(0);
-      transferMessage.set_pointer((int64_t)dst);
+      transferMessage.set_pointer(reinterpret_cast<int64_t>(dst));
       transferMessage.SerializeToString(&message);
       sendMessage(socketID, message);
       sendData(socketID, src, count);
@@ -113,7 +122,7 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_compresskind(NoCompression);
       transferMessage.set_size(count);
       transferMessage.set_compressedsize(0);
-      transferMessage.set_pointer((int64_t)src);
+      transferMessage.set_pointer(reinterpret_cast<int64_t>(src));
       transferMessage.SerializeToString(&message);
       sendMessage(socketID, message);
       recData(socketID, dst, count);
@@ -125,7 +134,7 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
 // Freeing the array on the cloud
 cloudError_t cloudFree(int socketID, void * cloudPtr){
     pointerMessage.set_messagetype(FreeCommand);
-    pointerMessage.set_pointer((int64_t)(cloudPtr));
+    pointerMessage.set_pointer(reinterpret_cast<int64_t>(cloudPtr));
     pointerMessage.SerializeToString(&message);
     return sendMessage(socketID, message);
 }

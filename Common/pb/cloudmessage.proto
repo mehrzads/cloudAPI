@@ -17,6 +17,11 @@ message PointerMessage {
   required int64 pointer = 2;
 }
 
+message FunctionCallMessage {
+  required int32 messagetype = 1;
+  required int32 functiontype = 2;
+  required string  argsmessage = 3;
+}
 
 message TransferMessage {
   required int32 messagetype = 1;

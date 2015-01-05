@@ -1,0 +1,13 @@
+// See README.txt for information and build instructions.
+syntax = "proto2";
+package clblasargs;
+
+message MatrixMultiplicationMessage{
+  required int32 dim0 = 1;
+  required int32 dim1 = 2;
+  required int32 dim2 = 3;
+  required int64 matrix0 = 4;
+  required int64 matrix1 = 5;
+  required int64 matrix2 = 6;
+}
+
