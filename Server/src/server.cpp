@@ -44,13 +44,13 @@ int intitializeSocket(int portno, int &sockfd){
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
-    if (bind(sockfd, (struct sockaddr *) &serv_addr,
+    if (bind(sockfd, reinterpret_cast<struct sockaddr *>(&serv_addr),
              sizeof(serv_addr)) < 0) 
              error("ERROR on binding");
     listen(sockfd,5);
     clilen = sizeof(cli_addr);
     int newsockfd = accept(sockfd, 
-                (struct sockaddr *) &cli_addr, 
+                reinterpret_cast<struct sockaddr *>(&cli_addr), 
                 &clilen);
     if (newsockfd < 0) error("ERROR on accept");
     return newsockfd;
@@ -61,7 +61,7 @@ void handleAllocationMessage(int socketID, string message){
   sizeMessage.ParseFromString(message);
   void * cloudPtr = malloc(sizeMessage.size());
   pointerMessage.set_messagetype(PointerCommand);
-  pointerMessage.set_pointer((int64_t)(cloudPtr));
+  pointerMessage.set_pointer(reinterpret_cast<int64_t>(cloudPtr));
   pointerMessage.SerializeToString(&message);
   sendMessage(socketID, message);
 }
@@ -69,13 +69,13 @@ void handleAllocationMessage(int socketID, string message){
 void handleGetMessage(int socketID, string message){
   transferMessage.ParseFromString(message);
   if (transferMessage.compresskind() == NoCompression)
-    recData(socketID, (void *) transferMessage.pointer(),  transferMessage.size());
+    recData(socketID, reinterpret_cast<void *>(transferMessage.pointer()),  transferMessage.size());
   else{
-    unsigned char * compressedData = (unsigned char * )malloc(transferMessage.compressedsize());
+    unsigned char * compressedData = static_cast<unsigned char *>(malloc(transferMessage.compressedsize()));
     if (!compressedData) printf("Allocation is NULL\n");	     
-    recData(socketID, (void *) compressedData,   transferMessage.compressedsize());
-    size_t outputSize = (size_t)(transferMessage.size());
-    decompress(compressedData, transferMessage.compressedsize(), (unsigned char *)transferMessage.pointer(), outputSize, (cloudCompressionKind)transferMessage.compresskind());
+    recData(socketID, static_cast<void *>(compressedData),   transferMessage.compressedsize());
+    size_t outputSize = static_cast<size_t>(transferMessage.size());
+    decompress(compressedData, transferMessage.compressedsize(), reinterpret_cast<unsigned char *>(transferMessage.pointer()), outputSize, (cloudCompressionKind)transferMessage.compresskind());
     free(compressedData);
   }
 }
@@ -83,12 +83,12 @@ void handleGetMessage(int socketID, string message){
 void handleSendMessage(int socketID, string message){
   transferMessage.ParseFromString(message);
   if (transferMessage.compresskind() == NoCompression)
-    sendData(socketID, (void *) transferMessage.pointer(),  transferMessage.size());
+    sendData(socketID, reinterpret_cast<void *>(transferMessage.pointer()),  transferMessage.size());
   else{
     size_t compressedSize = getMaxLength(transferMessage.size(), (cloudCompressionKind)transferMessage.compresskind());
-    unsigned char *compressedData = (unsigned char * )malloc(compressedSize);
+    unsigned char *compressedData = static_cast<unsigned char *>(malloc(compressedSize));
     if (!compressedData) printf("Allocation is NULL\n");	
-    compress((unsigned char *)transferMessage.pointer(), (size_t)transferMessage.size(), compressedData, compressedSize, 1, (cloudCompressionKind)transferMessage.compresskind());
+    compress(reinterpret_cast<unsigned char *>(transferMessage.pointer()), static_cast<size_t>(transferMessage.size()), compressedData, compressedSize, 1, (cloudCompressionKind)transferMessage.compresskind());
     sizeMessage.set_messagetype(SizeCommand);
     sizeMessage.set_size(compressedSize);
     sizeMessage.SerializeToString(&message);
@@ -107,7 +107,7 @@ void handleCloseMessage(int socketID, int socketID2){
 
 void handleFreeMessage(string message){
    pointerMessage.ParseFromString(message);
-   free((void *)pointerMessage.pointer());
+   free(reinterpret_cast<void *>(pointerMessage.pointer()));
 }
 
 void monitor(int portno){

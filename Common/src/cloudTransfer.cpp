@@ -35,6 +35,7 @@ cloudError_t sendData(int socketID, const void * data, size_t size){
 cloudError_t recData(int socketID, void * data, size_t size){
   unsigned int sent = 0;
   while (sent < size){
+    //static casts are added to remove the warning
     int n = read(socketID, static_cast<void *>(static_cast<char *>(data) + sent), size - sent);
     sent += n;
     if (n < 0) return CloudErrorRead;
