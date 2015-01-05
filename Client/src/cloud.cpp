@@ -127,7 +127,6 @@ cloudError_t cloudFree(int socketID, void * cloudPtr){
     pointerMessage.set_messagetype(FreeCommand);
     pointerMessage.set_pointer((int64_t)(cloudPtr));
     pointerMessage.SerializeToString(&message);
-    print(message);
     return sendMessage(socketID, message);
 }
 
