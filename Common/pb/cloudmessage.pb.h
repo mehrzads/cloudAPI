@@ -415,26 +415,12 @@ class FunctionCallMessage : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 functiontype() const;
   inline void set_functiontype(::google::protobuf::int32 value);
 
-  // required string argsmessage = 3;
-  inline bool has_argsmessage() const;
-  inline void clear_argsmessage();
-  static const int kArgsmessageFieldNumber = 3;
-  inline const ::std::string& argsmessage() const;
-  inline void set_argsmessage(const ::std::string& value);
-  inline void set_argsmessage(const char* value);
-  inline void set_argsmessage(const char* value, size_t size);
-  inline ::std::string* mutable_argsmessage();
-  inline ::std::string* release_argsmessage();
-  inline void set_allocated_argsmessage(::std::string* argsmessage);
-
   // @@protoc_insertion_point(class_scope:cloudmessaging.FunctionCallMessage)
  private:
   inline void set_has_messagetype();
   inline void clear_has_messagetype();
   inline void set_has_functiontype();
   inline void clear_has_functiontype();
-  inline void set_has_argsmessage();
-  inline void clear_has_argsmessage();
 
   // helper for ByteSize()
   int RequiredFieldsByteSizeFallback() const;
@@ -444,7 +430,6 @@ class FunctionCallMessage : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::google::protobuf::int32 messagetype_;
   ::google::protobuf::int32 functiontype_;
-  ::google::protobuf::internal::ArenaStringPtr argsmessage_;
   friend void  protobuf_AddDesc_cloudmessage_2eproto();
   friend void protobuf_AssignDesc_cloudmessage_2eproto();
   friend void protobuf_ShutdownFile_cloudmessage_2eproto();
@@ -769,59 +754,6 @@ inline void FunctionCallMessage::set_functiontype(::google::protobuf::int32 valu
   set_has_functiontype();
   functiontype_ = value;
   // @@protoc_insertion_point(field_set:cloudmessaging.FunctionCallMessage.functiontype)
-}
-
-// required string argsmessage = 3;
-inline bool FunctionCallMessage::has_argsmessage() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void FunctionCallMessage::set_has_argsmessage() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void FunctionCallMessage::clear_has_argsmessage() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void FunctionCallMessage::clear_argsmessage() {
-  argsmessage_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  clear_has_argsmessage();
-}
-inline const ::std::string& FunctionCallMessage::argsmessage() const {
-  // @@protoc_insertion_point(field_get:cloudmessaging.FunctionCallMessage.argsmessage)
-  return argsmessage_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void FunctionCallMessage::set_argsmessage(const ::std::string& value) {
-  set_has_argsmessage();
-  argsmessage_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:cloudmessaging.FunctionCallMessage.argsmessage)
-}
-inline void FunctionCallMessage::set_argsmessage(const char* value) {
-  set_has_argsmessage();
-  argsmessage_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:cloudmessaging.FunctionCallMessage.argsmessage)
-}
-inline void FunctionCallMessage::set_argsmessage(const char* value, size_t size) {
-  set_has_argsmessage();
-  argsmessage_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:cloudmessaging.FunctionCallMessage.argsmessage)
-}
-inline ::std::string* FunctionCallMessage::mutable_argsmessage() {
-  set_has_argsmessage();
-  // @@protoc_insertion_point(field_mutable:cloudmessaging.FunctionCallMessage.argsmessage)
-  return argsmessage_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* FunctionCallMessage::release_argsmessage() {
-  clear_has_argsmessage();
-  return argsmessage_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void FunctionCallMessage::set_allocated_argsmessage(::std::string* argsmessage) {
-  if (argsmessage != NULL) {
-    set_has_argsmessage();
-  } else {
-    clear_has_argsmessage();
-  }
-  argsmessage_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), argsmessage);
-  // @@protoc_insertion_point(field_set_allocated:cloudmessaging.FunctionCallMessage.argsmessage)
 }
 
 // -------------------------------------------------------------------

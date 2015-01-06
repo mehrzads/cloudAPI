@@ -47,8 +47,10 @@ cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
 }
 
 cloudError_t  cloudFunctionCall(int socketID, cloudFunctionKind functionType, std::string argsMessage){
+   functionCallMessage.set_messagetype(FunctionCallCommand);
+   printf("Function kind is %d\n", functionType);
    functionCallMessage.set_functiontype(functionType);
-   functionCallMessage.ParseFromString(message);
+   functionCallMessage.SerializeToString(&message);
    sendMessage(socketID, message);
    sendMessage(socketID, argsMessage);
    return CloudSuccess;

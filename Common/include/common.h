@@ -35,7 +35,7 @@ enum cloudCompressionKind{
 };
 
 enum cloudFunctionKind{
-    ClBlasStart,
+    ClBlasStart = 0,
     ClBlasMatrixMaltiplication,
     ClBlasEnd
 };

@@ -93,10 +93,9 @@ void protobuf_AssignDesc_cloudmessage_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PointerMessage, _internal_metadata_),
       -1);
   FunctionCallMessage_descriptor_ = file->message_type(3);
-  static const int FunctionCallMessage_offsets_[3] = {
+  static const int FunctionCallMessage_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FunctionCallMessage, messagetype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FunctionCallMessage, functiontype_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FunctionCallMessage, argsmessage_),
   };
   FunctionCallMessage_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -178,12 +177,12 @@ void protobuf_AddDesc_cloudmessage_2eproto() {
     "CommonMessage\022\023\n\013messagetype\030\001 \002(\005\"0\n\013Si"
     "zeMessage\022\023\n\013messagetype\030\001 \002(\005\022\014\n\004size\030\002"
     " \002(\005\"6\n\016PointerMessage\022\023\n\013messagetype\030\001 "
-    "\002(\005\022\017\n\007pointer\030\002 \002(\003\"U\n\023FunctionCallMess"
+    "\002(\005\022\017\n\007pointer\030\002 \002(\003\"@\n\023FunctionCallMess"
     "age\022\023\n\013messagetype\030\001 \002(\005\022\024\n\014functiontype"
-    "\030\002 \002(\005\022\023\n\013argsmessage\030\003 \002(\t\"s\n\017TransferM"
-    "essage\022\023\n\013messagetype\030\001 \002(\005\022\024\n\014compressk"
-    "ind\030\002 \002(\005\022\014\n\004size\030\003 \002(\005\022\026\n\016compressedsiz"
-    "e\030\004 \002(\005\022\017\n\007pointer\030\005 \002(\003", 384);
+    "\030\002 \002(\005\"s\n\017TransferMessage\022\023\n\013messagetype"
+    "\030\001 \002(\005\022\024\n\014compresskind\030\002 \002(\005\022\014\n\004size\030\003 \002"
+    "(\005\022\026\n\016compressedsize\030\004 \002(\005\022\017\n\007pointer\030\005 "
+    "\002(\003", 363);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "cloudmessage.proto", &protobuf_RegisterTypes);
   CommonMessage::default_instance_ = new CommonMessage();
@@ -1058,7 +1057,6 @@ void PointerMessage::InternalSwap(PointerMessage* other) {
 #ifndef _MSC_VER
 const int FunctionCallMessage::kMessagetypeFieldNumber;
 const int FunctionCallMessage::kFunctiontypeFieldNumber;
-const int FunctionCallMessage::kArgsmessageFieldNumber;
 #endif  // !_MSC_VER
 
 FunctionCallMessage::FunctionCallMessage()
@@ -1079,11 +1077,9 @@ FunctionCallMessage::FunctionCallMessage(const FunctionCallMessage& from)
 }
 
 void FunctionCallMessage::SharedCtor() {
-  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   messagetype_ = 0;
   functiontype_ = 0;
-  argsmessage_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1093,7 +1089,6 @@ FunctionCallMessage::~FunctionCallMessage() {
 }
 
 void FunctionCallMessage::SharedDtor() {
-  argsmessage_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
 }
@@ -1134,12 +1129,7 @@ void FunctionCallMessage::Clear() {
     ::memset(&first, 0, n);                                \
   } while (0)
 
-  if (_has_bits_[0 / 32] & 7) {
-    ZR_(messagetype_, functiontype_);
-    if (has_argsmessage()) {
-      argsmessage_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    }
-  }
+  ZR_(messagetype_, functiontype_);
 
 #undef OFFSET_OF_FIELD_
 #undef ZR_
@@ -1185,23 +1175,6 @@ bool FunctionCallMessage::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_argsmessage;
-        break;
-      }
-
-      // required string argsmessage = 3;
-      case 3: {
-        if (tag == 26) {
-         parse_argsmessage:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_argsmessage()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->argsmessage().data(), this->argsmessage().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "cloudmessaging.FunctionCallMessage.argsmessage");
-        } else {
-          goto handle_unusual;
-        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -1241,16 +1214,6 @@ void FunctionCallMessage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->functiontype(), output);
   }
 
-  // required string argsmessage = 3;
-  if (has_argsmessage()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->argsmessage().data(), this->argsmessage().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "cloudmessaging.FunctionCallMessage.argsmessage");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->argsmessage(), output);
-  }
-
   if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1269,17 +1232,6 @@ void FunctionCallMessage::SerializeWithCachedSizes(
   // required int32 functiontype = 2;
   if (has_functiontype()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->functiontype(), target);
-  }
-
-  // required string argsmessage = 3;
-  if (has_argsmessage()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->argsmessage().data(), this->argsmessage().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "cloudmessaging.FunctionCallMessage.argsmessage");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->argsmessage(), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -1307,19 +1259,12 @@ int FunctionCallMessage::RequiredFieldsByteSizeFallback() const {
         this->functiontype());
   }
 
-  if (has_argsmessage()) {
-    // required string argsmessage = 3;
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
-        this->argsmessage());
-  }
-
   return total_size;
 }
 int FunctionCallMessage::ByteSize() const {
   int total_size = 0;
 
-  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
+  if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
     // required int32 messagetype = 1;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
@@ -1329,11 +1274,6 @@ int FunctionCallMessage::ByteSize() const {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->functiontype());
-
-    // required string argsmessage = 3;
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
-        this->argsmessage());
 
   } else {
     total_size += RequiredFieldsByteSizeFallback();
@@ -1370,10 +1310,6 @@ void FunctionCallMessage::MergeFrom(const FunctionCallMessage& from) {
     if (from.has_functiontype()) {
       set_functiontype(from.functiontype());
     }
-    if (from.has_argsmessage()) {
-      set_has_argsmessage();
-      argsmessage_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.argsmessage_);
-    }
   }
   if (from._internal_metadata_.have_unknown_fields()) {
     mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -1393,7 +1329,7 @@ void FunctionCallMessage::CopyFrom(const FunctionCallMessage& from) {
 }
 
 bool FunctionCallMessage::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
   return true;
 }
@@ -1405,7 +1341,6 @@ void FunctionCallMessage::Swap(FunctionCallMessage* other) {
 void FunctionCallMessage::InternalSwap(FunctionCallMessage* other) {
   std::swap(messagetype_, other->messagetype_);
   std::swap(functiontype_, other->functiontype_);
-  argsmessage_.Swap(&other->argsmessage_);
   std::swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);

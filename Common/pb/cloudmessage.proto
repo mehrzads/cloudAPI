@@ -20,7 +20,6 @@ message PointerMessage {
 message FunctionCallMessage {
   required int32 messagetype = 1;
   required int32 functiontype = 2;
-  required string  argsmessage = 3;
 }
 
 message TransferMessage {

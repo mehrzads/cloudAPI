@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     float * c_B;
     float * c_C;
     cloudInit(portno, hostname, sockfd);
-    int N = 8192;
+    int N = 1024;
     int size = N * N;
     float * A = (float *) malloc( size * sizeof(float));
     float * B = (float *) malloc( size * sizeof(float));

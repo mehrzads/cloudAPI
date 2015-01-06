@@ -102,9 +102,11 @@ void handleSendMessage(int socketID, string message){
 
 void handleFunctionCallMessage(int socketID, string message){
   functionCallMessage.ParseFromString(message);
+  string argsMessage;
+  recMessage(socketID, argsMessage);
   switch (functionCallMessage.functiontype()){
     case ClBlasStart ... ClBlasEnd:
-      handleClblasFunction(static_cast<cloudFunctionKind>(functionCallMessage.functiontype()), functionCallMessage.argsmessage());
+      handleClblasFunction(static_cast<cloudFunctionKind>(functionCallMessage.functiontype()), argsMessage);
       break;
     default:
       assert("Wrong function call type" && 0);
