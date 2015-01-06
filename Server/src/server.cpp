@@ -14,6 +14,7 @@
 #include "compression.h"
 #include "cloudmessage.pb.h" 
 #include "cloudTransfer.h"
+#include "clblas.h"
 using namespace std;
 using namespace cloudmessaging;
 using namespace google::protobuf;
@@ -22,6 +23,7 @@ PointerMessage pointerMessage;
 SizeMessage sizeMessage;
 TransferMessage transferMessage;
 CommonMessage baseMessage;
+FunctionCallMessage functionCallMessage;
 string message;
 
 
@@ -98,6 +100,17 @@ void handleSendMessage(int socketID, string message){
   }
 }
 
+void handleFunctionCallMessage(int socketID, string message){
+  functionCallMessage.ParseFromString(message);
+  switch (functionCallMessage.functiontype()){
+    case ClBlasStart ... ClBlasEnd:
+      handleClblasFunction(static_cast<cloudFunctionKind>(functionCallMessage.functiontype()), functionCallMessage.argsmessage());
+      break;
+    default:
+      assert("Wrong function call type" && 0);
+      break;
+  }
+}
 
 void handleCloseMessage(int socketID, int socketID2){
    close(socketID);
@@ -130,6 +143,9 @@ void monitor(int portno){
 	// Sending data to the client  
 	case SendCommand:
 	  handleSendMessage(newsockfd, message);
+	  break;
+	case FunctionCallCommand:
+	  handleFunctionCallMessage(newsockfd, message);
 	  break;
 	// Freeing the memory
 	case FreeCommand:

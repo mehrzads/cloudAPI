@@ -22,7 +22,7 @@ enum cloudCommandKind{
     GetCommand,
     SendCommand,
     FreeCommand,
-    FunctionCall,
+    FunctionCallCommand,
     PointerCommand,
     SizeCommand,
     CloseCommand
@@ -35,7 +35,9 @@ enum cloudCompressionKind{
 };
 
 enum cloudFunctionKind{
-    ClBlasMatrixMaltiplication
+    ClBlasStart,
+    ClBlasMatrixMaltiplication,
+    ClBlasEnd
 };
 #endif /* ifndef COMMON_H */
 
