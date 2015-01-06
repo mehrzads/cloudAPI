@@ -10,8 +10,8 @@ cloudError_t matrixMultiply(int socketID, int l, int m, int n , float * A, float
   std::string message;
   MatrixMultiplicationMessage matrixMultiplicationMessage;
   matrixMultiplicationMessage.set_dim0(l);
-  matrixMultiplicationMessage.set_dim0(m);
-  matrixMultiplicationMessage.set_dim0(n);
+  matrixMultiplicationMessage.set_dim1(m);
+  matrixMultiplicationMessage.set_dim2(n);
   matrixMultiplicationMessage.set_matrix0(reinterpret_cast<int64_t>(A));
   matrixMultiplicationMessage.set_matrix1(reinterpret_cast<int64_t>(B));
   matrixMultiplicationMessage.set_matrix2(reinterpret_cast<int64_t>(C));
