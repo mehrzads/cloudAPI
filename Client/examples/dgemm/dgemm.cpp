@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
   cloudMemcpy(sockfd,  c_B,  B,  size * sizeof(double), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
   
  // matrixMultiply(sockfd, N, N, N , c_A, c_B, c_C);
-  cloudDgemm(sockfd, ClblasColMajor, ClblasNoTrans, ClblasNoTrans, N, N, N, 1.0, c_A, N, c_B, N, 0.0, c_C, N);
+  cloudDgemm(sockfd, ClblasRowMajor, ClblasNoTrans, ClblasNoTrans, N, N, N, 1.0, c_A, N, c_B, N, 0.0, c_C, N);
   
   cloudMemcpy(sockfd,  C,  c_C,  size * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
   

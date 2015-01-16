@@ -26,8 +26,9 @@ cloudError_t cloudDgemm(int socketID, CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANS
   dgemmMessage.set_lda(LDA);
   dgemmMessage.set_b(reinterpret_cast<int64_t>(B));
   dgemmMessage.set_ldb(LDB);
-  dgemmMessage.set_alpha(BETA);
+  dgemmMessage.set_beta(BETA);
   dgemmMessage.set_c(reinterpret_cast<int64_t>(C));
   dgemmMessage.set_ldc(LDC);
+  dgemmMessage.SerializeToString(&message);
   return cloudFunctionCall(socketID, ClBlasDGEMM, message); 
 }
