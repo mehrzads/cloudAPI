@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <limits.h> 
+#include <math.h> 
 #include <chrono>
 #include "cloud.h"
 #include "cloudTimer.h"
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
   cloudMemcpy(sockfd,  c_B,  B,  size * sizeof(double), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
   
  // matrixMultiply(sockfd, N, N, N , c_A, c_B, c_C);
-  cloudDgemm(sockfd, ClblasRowMajor, ClblasNoTrans, ClblasNoTrans, N, N, N, 1.0, c_A, N, c_B, N, 0.0, c_C, N);
+  cloudDgemm(sockfd, ClblasColMajor, ClblasNoTrans, ClblasNoTrans, N, N, N, 1.0, c_A, N, c_B, N, 0.0, c_C, N);
   
   cloudMemcpy(sockfd,  C,  c_C,  size * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
   
@@ -73,14 +74,14 @@ int main(int argc, char *argv[])
     for (int j = 0; j < N; j++) {
       double sum = 0;
       for (int k = 0; k < N; k++)
-	sum = A[i * N + k] * B[k * N + j];
+	sum += A[i * N + k] * B[k * N + j];
       C_ref[i * N + j] = sum;
   }
 
-    
+  
   int ferror = 0;
   for (int i = 0; i < size ; i++)
-     if (C[i] != C_ref[i])
+     if (fabs(C[i] - C_ref[i])!= 0.0 )
        ferror =1;
   if (ferror ==0)
      printf("Passed\n");
