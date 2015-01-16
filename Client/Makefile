@@ -1,22 +1,23 @@
-CC=g++
-CFLAGS=-c -Wall -std=c++11
-LDFLAGS= -lpthread -lz -lsnappy `pkg-config --cflags --libs protobuf` 
-SOURCES= $(wildcard src/*.cpp) $(wildcard ../Common/src/*.cpp)  
-PB_OBJS = $(shell find ../Common/pb/ -name '*.pb.o')
-OBJECTS=$(SOURCES:.cpp=.o)  $(PB_OBJS) 
-INCLUDES= -I. -Iinclude/ -I../Common/include/  -I../Common/pb     
+###############################################################################
+#
+# Cloud API Makefile
+#
+###############################################################################
 
-EXECUTABLE=client
+PROJECTS := $(shell find examples -name Makefile)
+%.ph_build : 
+	+@$(MAKE) -C $(dir $*) $(MAKECMDGOALS)
 
-all: $(SOURCES) $(EXECUTABLE)
-	
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $@ 
+%.ph_clean : 
+	+@$(MAKE) -C $(dir $*) clean 
 
-.cpp.o:
-	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
+all:  $(addsuffix .ph_build,$(PROJECTS))
+	@echo "Finished building all"
 
-clean: 
-	rm -f $(EXECUTABLE) src/*.o ../Common/src/*.o
+tidy:
+	@find * | egrep "#" | xargs rm -f
+	@find * | egrep "\~" | xargs rm -f
 
+clean:  tidy $(addsuffix .ph_clean,$(PROJECTS)) 
+	@echo "Finished cleaning"
 

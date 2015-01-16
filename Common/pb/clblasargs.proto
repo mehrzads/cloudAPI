@@ -11,3 +11,20 @@ message MatrixMultiplicationMessage{
   required int64 matrix2 = 6;
 }
 
+message DGEMMMessage{
+  required int32 order = 1;
+  required int32 transA = 2;
+  required int32 transB = 3;
+  required int32 M = 4;
+  required int32 N = 5;
+  required int32 K = 6;
+  required double alpha = 7;
+  required int64 A = 8;
+  required int32 lda = 9;
+  required int64 B = 10;
+  required int32 ldb = 11;
+  required double beta = 12;
+  required int64 C = 13;
+  required int32 ldc = 14;
+}
+

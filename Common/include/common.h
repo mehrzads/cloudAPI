@@ -36,8 +36,21 @@ enum cloudCompressionKind{
 
 enum cloudFunctionKind{
     ClBlasStart = 0,
-    ClBlasMatrixMaltiplication,
+    ClBlasDGEMM,
     ClBlasEnd
 };
+
+
+// BLAS related enums
+enum CLBLAS_ORDER{
+  ClblasRowMajor = 0,
+  ClblasColMajor
+};
+
+enum CLBLAS_TRANSPOSE{
+  ClblasNoTrans = 0,
+  ClblasTrans,
+  ClblasConjTrans 
+}; 
 #endif /* ifndef COMMON_H */
 
