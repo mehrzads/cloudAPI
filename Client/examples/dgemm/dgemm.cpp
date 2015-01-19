@@ -17,7 +17,7 @@
 
 
 
-
+#define EPSILON 0.0001
 
 int main(int argc, char *argv[])
 {
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
   cloudMemcpy(sockfd,  c_B,  B,  size * sizeof(double), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
   
  // matrixMultiply(sockfd, N, N, N , c_A, c_B, c_C);
-  cloudDgemm(sockfd, ClblasColMajor, ClblasNoTrans, ClblasNoTrans, N, N, N, 1.0, c_A, N, c_B, N, 0.0, c_C, N);
+  cloudDgemm(sockfd, ClblasRowMajor, ClblasNoTrans, ClblasNoTrans, N, N, N, 1.0, c_A, N, c_B, N, 0.0, c_C, N);
   
   cloudMemcpy(sockfd,  C,  c_C,  size * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
   
@@ -78,15 +78,50 @@ int main(int argc, char *argv[])
       C_ref[i * N + j] = sum;
   }
 
-  
+  int count = 0;
   int ferror = 0;
   for (int i = 0; i < size ; i++)
-     if (fabs(C[i] - C_ref[i])!= 0.0 )
+     if (fabs(C[i] - C_ref[i]) >  EPSILON) {
        ferror =1;
+       if (count <10){
+	  count ++;
+	  printf("%d %f %f\n",i,  C_ref[i], C[i]);
+       }
+
+     }
   if (ferror ==0)
      printf("Passed\n");
   else
      printf("Failed\n");       
+#if 0
+  printf("A:\n");
+  for (int i = 0 ; i < N ; i++){
+    for (int j = 0; j < N; j++) 
+      printf("%f ", A[i * N + j]);
+    printf("\n");
+  }
+  
+  printf("B:\n");
+  for (int i = 0 ; i < N ; i++){
+    for (int j = 0; j < N; j++) 
+      printf("%f ", B[i * N + j]);
+    printf("\n");
+  }
+  
+  printf("C:\n");
+  for (int i = 0 ; i < N ; i++){
+    for (int j = 0; j < N; j++) 
+      printf("%f ", C[i * N + j]);
+    printf("\n");
+  }
+  
+  printf("C_ref:\n");
+  for (int i = 0 ; i < N ; i++){
+    for (int j = 0; j < N; j++) 
+      printf("%f ", C_ref[i * N + j]);
+    printf("\n");
+  }
+#endif  
 
   free(A);
   free(B);
