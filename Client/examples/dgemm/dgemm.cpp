@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
   printf("Transfer from server %f ms\n", time_in_seconds * 1000);
   printf("Transfer rate %f Gbps\n", (size * sizeof(double) * 8 * 2 )/(1024 * 1024 *1024 *time_in_seconds) );
             
-  
+#if 0  
   for (int i = 0 ; i < N ; i++)
     for (int j = 0; j < N; j++) {
       double sum = 0;
@@ -77,7 +77,15 @@ int main(int argc, char *argv[])
 	sum += A[i * N + k] * B[k * N + j];
       C_ref[i * N + j] = sum;
   }
+#endif  
 
+  for (int i = 0 ; i < N ; i++)
+    for (int j = 0; j < N; j++) {
+      double sum = 0;
+      for (int k = 0; k < N; k++)
+	sum += A[k * N + i] * B[j * N + k];
+      C_ref[j * N + i] = sum;
+  }
   int count = 0;
   int ferror = 0;
   for (int i = 0; i < size ; i++)
