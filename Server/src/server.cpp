@@ -124,8 +124,8 @@ void handleFreeMessage(string message){
    pointerMessage.ParseFromString(message);
    free(reinterpret_cast<void *>(pointerMessage.pointer()));
 }
-
 void monitor(int portno){
+
     int sockfd, newsockfd;
     newsockfd = intitializeSocket(portno, sockfd);
     bool listen = true;
