@@ -157,6 +157,7 @@ void lapack_dgemm(CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRANSPOSE 
 
     blacs_gridexit( grid );
     blacs_exit(0);
+    MPI_Barrier( MPI_COMM_WORLD );
 }
 
 
@@ -168,7 +169,8 @@ cloudError_t cloudDgemm(CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRAN
     double BETA, 
     double * C, int LDC){
 
-  cblas_dgemm(OrderTransTable[Order], TransposeTransTable[TRANSA], TransposeTransTable[TRANSB], M,    N,    K, ALPHA,   A,   LDA, B, LDB, BETA, C,  LDC);
+ // cblas_dgemm(OrderTransTable[Order], TransposeTransTable[TRANSA], TransposeTransTable[TRANSB], M,    N,    K, ALPHA,   A,   LDA, B, LDB, BETA, C,  LDC);
+  lapack_dgemm(Order, TRANSA, TRANSB, M,    N,    K, ALPHA,   A,   LDA, B, LDB, BETA, C,  LDC);
   return CloudSuccess; 
 }
 cloudError_t handleClblasFunction(cloudFunctionKind functionType, std::string argsMessage)

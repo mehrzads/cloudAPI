@@ -1,9 +1,5 @@
 #!/bin/bash
-#mpirun.mpich2 -n 1 -f host_file ./gemm 8192 8
-mpirun.mpich2 -n 1  ./gemm 16384 8
-#mpirun.mpich2 -n 1  ./gemm 16384 4
-
-
+mpirun.mpich2 -np 4  ./server 51717
 # $Id: $
 
 
