@@ -1,15 +1,26 @@
 #include <utility>
 #include <cblas.h>              /* Basic Linear Algebra I/O */
+#include <math.h>              /* Basic Linear Algebra I/O */
 #include "mpi.h"
 #include "common.h" 
 #include "clblas.h" 
 #include "clblasargs.pb.h" 
 #include "scalapack.h"
 
+using namespace std;
 using namespace clblasargs;
 DGEMMMessage dgemmMessage;
 CBLAS_ORDER OrderTransTable[]={CblasRowMajor, CblasColMajor};
 CBLAS_TRANSPOSE TransposeTransTable[]={CblasNoTrans, CblasTrans, CblasConjTrans};
+
+int getRootFactor( int n ) {
+    for( int t = sqrt(n); t > 0; t-- ) {
+        if( n % t == 0 ) {
+            return t;
+        }
+    }
+    return 1;
+}
 
 void lapack_dgemm(CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRANSPOSE TRANSB, 
     int M, int N, int K, 
@@ -20,9 +31,7 @@ void lapack_dgemm(CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRANSPOSE 
     double * C, int LDC){
     int p, P;
     blacs_pinfo( &p, &P );
-//    mpi_print( toString(p) + " / " + toString(P) );
-    FILE * result;
-    int numthreads;
+    int numthreads = 2;
     openblas_set_num_threads( numthreads );
 
     int nprows = getRootFactor(P);
@@ -102,7 +111,7 @@ void lapack_dgemm(CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRANSPOSE 
 
     MPI_Barrier( MPI_COMM_WORLD );
 
-    pdgemm( false, false, m, n, k, 1,
+    pdgemm( false, false, M, N, K, 1,
                       ipa, 1, 1, &desca, ipb, 1, 1, &descb,
                       1, ipc, 1, 1, &descc );
     
@@ -120,7 +129,7 @@ void lapack_dgemm(CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRANSPOSE 
             // Number of cols to be sent
             // Is this the last col block?
             int nc = nb;
-            if (n-c < nb)
+            if (N-c < nb)
                 nc = N-c;
  
             if (myrow == sendr && mycol == sendc) {
