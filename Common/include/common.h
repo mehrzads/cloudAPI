@@ -51,6 +51,6 @@ enum CLBLAS_TRANSPOSE{
   ClblasNoTrans = 0,
   ClblasTrans,
   ClblasConjTrans 
-}; 
+};
 #endif /* ifndef COMMON_H */
 
