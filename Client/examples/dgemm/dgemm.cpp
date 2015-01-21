@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
   double * c_B;
   double * c_C;
   cloudInit(portno, hostname, sockfd);
-  int N = 1024;
+  int N = 8192;
   int size = N * N;
   double * A = (double *) malloc( size * sizeof(double));
   double * B = (double *) malloc( size * sizeof(double));
@@ -67,7 +67,6 @@ int main(int argc, char *argv[])
   double time_in_seconds = cloudTimer.getDurationInSeconds();
   
   printf("Transfer from server %f ms\n", time_in_seconds * 1000);
-  printf("Transfer rate %f Gbps\n", (size * sizeof(double) * 8 * 2 )/(1024 * 1024 *1024 *time_in_seconds) );
             
 #if 0  
   for (int i = 0 ; i < N ; i++)
@@ -79,6 +78,8 @@ int main(int argc, char *argv[])
   }
 #endif  
 
+#if 0  
+  cloudTimer.start();
   for (int i = 0 ; i < N ; i++)
     for (int j = 0; j < N; j++) {
       double sum = 0;
@@ -86,6 +87,10 @@ int main(int argc, char *argv[])
 	sum += A[k * N + i] * B[j * N + k];
       C_ref[j * N + i] = sum;
   }
+  cloudTimer.end();    
+  time_in_seconds = cloudTimer.getDurationInSeconds();
+  
+  printf("Transfer from server %f ms\n", time_in_seconds*1000);
   int count = 0;
   int ferror = 0;
   for (int i = 0; i < size ; i++)
@@ -100,7 +105,8 @@ int main(int argc, char *argv[])
   if (ferror ==0)
      printf("Passed\n");
   else
-     printf("Failed\n");       
+     printf("Failed\n");      
+#endif  
 #if 0
   printf("A:\n");
   for (int i = 0 ; i < N ; i++){
