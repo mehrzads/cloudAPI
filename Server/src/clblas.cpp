@@ -23,6 +23,8 @@ void lapack_dgemm(CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRANSPOSE 
     double BETA, 
     double * C, int LDC, MPIInfo mpiInfo){
 
+    int numthreads = 8;
+    openblas_set_num_threads( numthreads );
     // A     B       C
     // m x k k x n = m x n
 

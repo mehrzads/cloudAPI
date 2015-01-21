@@ -140,8 +140,6 @@ void handleFreeMessage(string message){
 void MPIInitialize(MPIInfo & info){
     blacs_pinfo( &info.rank, &info.nProcs );
 
-    int numthreads = 2;
-    openblas_set_num_threads( numthreads );
 
     info.nRows = getRootFactor(info.nProcs);
     info.nCols = info.nProcs / info.nRows;
@@ -176,7 +174,7 @@ void broadcastString(bool root, std::string& strg) {
      MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
      char* charstr = new char[length+1];
      MPI_Bcast(charstr, length, MPI_CHAR, 0, MPI_COMM_WORLD);
-     strg = charstr;
+     strg = string(charstr, length);
      delete [] charstr;
    }
  
@@ -216,12 +214,7 @@ void monitor(int portno){
 	    if (rootProc) recMessage(newsockfd, argsMessage);
 	    broadcastString(rootProc, message);
 	    broadcastString(rootProc, argsMessage);
-
-	    printf("%d\n", message.size());
-	    printf("%d\n", argsMessage.size());
-/*	    for (int i = 0; i < message.size(); i++)
-	      printf("%c ", message[i]);*/
-//	    handleFunctionCallMessage(message, argsMessage, mpiInfo);
+	    handleFunctionCallMessage(message, argsMessage, mpiInfo);
 	    break;
 	  // Freeing the memory
 	  case FreeCommand:

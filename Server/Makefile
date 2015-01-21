@@ -4,7 +4,7 @@ LDFLAGS= -L/opt/OpenBLAS/lib -lopenblas  -lpthread -lz  -lsnappy `pkg-config --c
 SOURCES= $(wildcard src/*.cpp) $(wildcard ../Common/src/*.cpp) 
 PB_OBJS = $(shell find ../Common/pb/ -name '*.pb.o')
 OBJECTS=$(SOURCES:.cpp=.o) $(PB_OBJS)
-INCLUDES= -I. -Iinclude/ -I../Common/include -I../Common/pb/ -I/opt/OpenBLAS/include 
+INCLUDES= -I. -Iinclude/ -I../Common/include -I../Common/pb/  -I/opt/OpenBLAS/include
 
 EXECUTABLE=server
 
