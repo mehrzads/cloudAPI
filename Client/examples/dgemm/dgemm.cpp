@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
   cloudTimer.end();    
   double time_in_seconds = cloudTimer.getDurationInSeconds();
   
-  printf("Transfer from server %f ms\n", time_in_seconds * 1000);
+  printf("Server response %f ms\n", time_in_seconds * 1000);
             
 #if 0  
   for (int i = 0 ; i < N ; i++)
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
   cloudTimer.end();    
   time_in_seconds = cloudTimer.getDurationInSeconds();
   
-  printf("Transfer from server %f ms\n", time_in_seconds*1000);
+  printf("Naive implementation %f ms\n", time_in_seconds*1000);
   int count = 0;
   int ferror = 0;
   for (int i = 0; i < size ; i++)
