@@ -1,12 +1,10 @@
 /* A simple server in the internet domain using TCP
    The port number is passed as an argument */
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <cblas.h>              /* Basic Linear Algebra I/O */
-#include <chrono>
 #include <utility>
 #include <math.h>              /* Basic Linear Algebra I/O */
 #include "mpi.h"

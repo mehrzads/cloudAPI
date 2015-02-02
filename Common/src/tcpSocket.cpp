@@ -5,6 +5,7 @@
 #include <string.h>
 #include "tcpSocket.h"
 
+using namespace std;
 void error(const char *msg)
 {
     perror(msg);
@@ -14,6 +15,7 @@ TCPSocket::TCPSocket():
       nThreads (1)
 {
   threads =(pthread_t *) malloc(MAXTHREADS * sizeof(pthread_t));
+  threadArg = (struct ThreadArg *) malloc(MAXTHREADS * sizeof(struct ThreadArg));
 } 
 
 TCPSocket::TCPSocket(unsigned int n): 
@@ -66,31 +68,98 @@ cloudError_t TCPSocket::recMessage(std::string &message){
   return CloudSuccess;
 }
 
-cloudError_t TCPSocket::sendData( const void * data, size_t size){
-  int socketID = getSocket(0);
+cloudError_t TCPSocket::sendStreamData( int socketID, char * data, size_t size){
   register size_t sent = 0;
   register size_t n = 0;
-  const char *  buf = static_cast<const char *>(data);
   while (sent < size){
-    n = write(socketID, buf + sent, size - sent);
+    n = write(socketID, data + sent, size - sent);
     if (n < 0) return CloudErrorWrite;
     sent += n;
   }
   return CloudSuccess;
 }
 
-cloudError_t TCPSocket::recData(void * data, size_t size){
-  int socketID = getSocket(0);
+cloudError_t TCPSocket::recStreamData(int socketID, char * data, size_t size){
   register size_t sent = 0;
   register size_t n = 0;
-  char *  buf = static_cast<char *>(data);
+//  char *  buf = static_cast<char *>(data);
   while (sent < size){
     //static casts are added to remove the warning
-    n = read(socketID, buf + sent, size - sent);
+    n = read(socketID, data + sent, size - sent);
     sent += n;
     if (n < 0) return CloudErrorRead;
   }
   return CloudSuccess;
+}
+
+void *TCPSocket::sendThread(void *arg){
+  struct ThreadArg* tArg =   ((struct ThreadArg*)arg);
+  size_t start = tArg->ID * tArg-> step;
+  size_t step = min(tArg-> step, tArg->size - start);
+  sendStreamData(tArg->socket,  tArg->data + start,  step);
+  return NULL;
+}
+
+void *TCPSocket::recThread(void *arg){
+  struct ThreadArg* tArg =   ((struct ThreadArg*)arg);
+  size_t start = tArg->ID * tArg-> step;
+  size_t step = min(tArg-> step, tArg->size - start);
+  recStreamData(tArg->socket,  tArg->data + start,  step);
+  return NULL;
+}
+
+cloudError_t TCPSocket::sendData( void * data, size_t size){
+   size_t step = size * sizeof(float) / nThreads;
+   int thread_cr_res = 0, thread_join_res;
+
+  for(unsigned int i = 0; i < nThreads; i++){
+    threadArg[i].data = static_cast<char *>(data);
+    threadArg[i].size = size * sizeof(float);
+    threadArg[i].step = step;
+    threadArg[i].socket = sockets[i];
+    threadArg[i].ID = i;
+    thread_cr_res = pthread_create(&threads[i], NULL, sendThread, (void*)(&threadArg[i]));
+    if(thread_cr_res != 0){
+      fprintf(stderr,"THREAD CREATE ERROR");
+      return CloudSuccess;
+    }
+  }
+  /* Later edit, joining the threads */
+  for (unsigned int i = 0; i < nThreads; i++){
+    thread_join_res = pthread_join(threads[i], NULL);
+    if(thread_join_res != 0){
+      fprintf(stderr, "JOIN ERROR");
+      return CloudSuccess;
+    }       
+  }
+      return CloudSuccess;
+}
+
+cloudError_t TCPSocket::recData(void * data, size_t size){
+   size_t step = size * sizeof(float) / nThreads;
+
+   int thread_cr_res = 0, thread_join_res;
+  for(unsigned int i = 0; i < nThreads; i++){
+    threadArg[i].data = static_cast<char *>(data);
+    threadArg[i].size = size * sizeof(float);
+    threadArg[i].step = step;
+    threadArg[i].socket = sockets[i];
+    threadArg[i].ID = i;
+    thread_cr_res = pthread_create(&threads[i], NULL, recThread, (void*)(&threadArg[i]));
+    if(thread_cr_res != 0){
+      fprintf(stderr,"THREAD CREATE ERROR");
+      return CloudSuccess;
+    }
+  }
+  /* Later edit, joining the threads */
+  for (unsigned int i = 0; i < nThreads; i++){
+    thread_join_res = pthread_join(threads[i], NULL);
+    if(thread_join_res != 0){
+      fprintf(stderr, "JOIN ERROR");
+      return CloudSuccess;
+    }       
+  }
+      return CloudSuccess;
 }
 
 
@@ -126,7 +195,7 @@ cloudError_t TCPSocket::serverListen(int portno){
       bzero((char *) &serv_addr, sizeof(serv_addr));
       serv_addr.sin_family = AF_INET;
       serv_addr.sin_addr.s_addr = INADDR_ANY;
-      serv_addr.sin_port = htons(portno);
+      serv_addr.sin_port = htons(portno + i);
       if (bind(origSockets[i], reinterpret_cast<struct sockaddr *>(&serv_addr),
 	       sizeof(serv_addr)) < 0) 
 	       error("ERROR on binding");

@@ -40,7 +40,7 @@ cloudError_t cloudMalloc(TCPSocket  &tcpSocket, void ** cloudPtr, size_t size){
 }
 
 // cloudMemcpy is transferring data between client and the server
-cloudError_t cloudMemcpy(TCPSocket  &tcpSocket,  void *  dst,  const void *  src,  size_t  count,   enum cloudMemcpyKind	 directionKind, enum cloudCompressionKind compressKind){
+cloudError_t cloudMemcpy(TCPSocket  &tcpSocket,  void *  dst,  void *  src,  size_t  count,   enum cloudMemcpyKind	 directionKind, enum cloudCompressionKind compressKind){
  
   if (compressKind != NoCompression){
     if (directionKind == cloudMemcpyClientToCloud) {
