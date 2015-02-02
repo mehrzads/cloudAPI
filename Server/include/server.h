@@ -3,7 +3,7 @@
  */
 #ifndef SERVER_H
 #  define SERVER_H
-typedef struct MPIInfo{
+struct MPIInfo{
   int nProcs;
   int rank;
   int nCols;

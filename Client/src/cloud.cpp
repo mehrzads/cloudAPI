@@ -1,16 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h> 
-#include <utility>
 #include "cloud.h" 
-#include "common.h" 
 #include "cloudmessage.pb.h" 
-#include "cloudTransfer.h" 
 using namespace std;
 using namespace cloudmessaging;
 
@@ -20,57 +9,38 @@ TransferMessage transferMessage;
 FunctionCallMessage functionCallMessage;
 string message;
 
-void error(const char *msg)
-{
-    perror(msg);
-    exit(0);
-}
-
 
 // Initializing the connection
-cloudError_t  cloudInit(int portno, char * hostname, int &socketID){
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
-    socketID = socket(AF_INET, SOCK_STREAM, 0);
-    if (socketID < 0) return CloudErrorOpen;
-    server = gethostbyname(hostname);
-    if (server == NULL) return CloudErrorNoHost;
-    bzero(reinterpret_cast<char *>(&serv_addr), sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    bcopy(static_cast<char *>(server->h_addr), 
-         reinterpret_cast<char *>(&serv_addr.sin_addr.s_addr),
-         server->h_length);
-    serv_addr.sin_port = htons(portno);
-    if (connect(socketID,reinterpret_cast<struct sockaddr *>( &serv_addr),sizeof(serv_addr)) < 0) 
-        return CloudErrorConnection;
-    return CloudSuccess;
+cloudError_t  cloudInit(int portno, char * hostname, TCPSocket  &tcpSocket){
+   tcpSocket.setnThreads(4);
+   return tcpSocket.clientConnect(portno, hostname);
 }
 
 // Calling a library function
-cloudError_t  cloudFunctionCall(int socketID, cloudFunctionKind functionType, std::string argsMessage){
+cloudError_t  cloudFunctionCall(TCPSocket  &tcpSocket, cloudFunctionKind functionType, std::string argsMessage){
    functionCallMessage.set_messagetype(FunctionCallCommand);
    functionCallMessage.set_functiontype(functionType);
    functionCallMessage.SerializeToString(&message);
-   sendMessage(socketID, message);
-   sendMessage(socketID, argsMessage);
+   tcpSocket.sendMessage(message);
+   tcpSocket.sendMessage(argsMessage);
    return CloudSuccess;
 
 }
 
 // Allocating an array with size in the server. 
-cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size){
+cloudError_t cloudMalloc(TCPSocket  &tcpSocket, void ** cloudPtr, size_t size){
     sizeMessage.set_messagetype(AllocCommand);
     sizeMessage.set_size(size);
     sizeMessage.SerializeToString(&message);
-    sendMessage(socketID, message);
-    recMessage(socketID, message);
+    tcpSocket.sendMessage(message);
+    tcpSocket.recMessage(message);
     pointerMessage.ParseFromString(message);
     *cloudPtr =  reinterpret_cast<void *> (pointerMessage.pointer());
     return CloudSuccess;
 }
 
 // cloudMemcpy is transferring data between client and the server
-cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t  count,   enum cloudMemcpyKind	 directionKind, enum cloudCompressionKind compressKind){
+cloudError_t cloudMemcpy(TCPSocket  &tcpSocket,  void *  dst,  const void *  src,  size_t  count,   enum cloudMemcpyKind	 directionKind, enum cloudCompressionKind compressKind){
  
   if (compressKind != NoCompression){
     if (directionKind == cloudMemcpyClientToCloud) {
@@ -85,8 +55,8 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_pointer(reinterpret_cast<int64_t>(dst));
       transferMessage.SerializeToString(&message);
       
-      sendMessage(socketID, message);
-      sendData(socketID, out, compressedSize);
+      tcpSocket.sendMessage(message);
+      tcpSocket.sendData(out, compressedSize);
       free(out);
     }    
     else if (directionKind == cloudMemcpyCloudToClient) {
@@ -97,13 +67,13 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_pointer(reinterpret_cast<int64_t>(src));
       transferMessage.SerializeToString(&message);
       
-      sendMessage(socketID, message);
-      recMessage(socketID, message);
+      tcpSocket.sendMessage(message);
+      tcpSocket.recMessage(message);
       
       sizeMessage.ParseFromString(message);
       size_t compressedSize =  static_cast<size_t>(sizeMessage.size());
       unsigned char * out  = static_cast<unsigned char *>(malloc(compressedSize * sizeof(char)));
-      recData(socketID, out, compressedSize);
+      tcpSocket.recData(out, compressedSize);
       decompress(out, compressedSize, static_cast<unsigned char *>(dst), count, compressKind);
       free(out);
     }
@@ -116,8 +86,8 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_compressedsize(0);
       transferMessage.set_pointer(reinterpret_cast<int64_t>(dst));
       transferMessage.SerializeToString(&message);
-      sendMessage(socketID, message);
-      sendData(socketID, src, count);
+      tcpSocket.sendMessage(message);
+      tcpSocket.sendData(src, count);
     }  
     else if (directionKind == cloudMemcpyCloudToClient) {
       transferMessage.set_messagetype(SendCommand);
@@ -126,28 +96,28 @@ cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t
       transferMessage.set_compressedsize(0);
       transferMessage.set_pointer(reinterpret_cast<int64_t>(src));
       transferMessage.SerializeToString(&message);
-      sendMessage(socketID, message);
-      recData(socketID, dst, count);
+      tcpSocket.sendMessage(message);
+      tcpSocket.recData(dst, count);
     }
   }
   return CloudSuccess;
 } 
 
 // Freeing the array on the cloud
-cloudError_t cloudFree(int socketID, void * cloudPtr){
+cloudError_t cloudFree(TCPSocket  & tcpSocket, void * cloudPtr){
     pointerMessage.set_messagetype(FreeCommand);
     pointerMessage.set_pointer(reinterpret_cast<int64_t>(cloudPtr));
     pointerMessage.SerializeToString(&message);
-    return sendMessage(socketID, message);
+    return tcpSocket.sendMessage(message);
 }
 
 // Finishing the connection
-cloudError_t cloudFinish( int socketID){
+cloudError_t cloudFinish(TCPSocket  & tcpSocket){
     sizeMessage.set_messagetype(CloseCommand);
     sizeMessage.set_size(0);
     sizeMessage.SerializeToString(&message);
-    sendMessage(socketID, message);
-    close(socketID);
+    tcpSocket.sendMessage(message);
+    tcpSocket.closeSocket();
     return CloudSuccess; 
 }
 

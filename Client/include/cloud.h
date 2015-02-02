@@ -8,15 +8,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string>
-#include "common.h"
+#include "tcpSocket.h"
 #include "compression.h"
 
-cloudError_t cloudInit(int portno, char * hostname, int &socketID);
-cloudError_t cloudFunctionCall(int socketID, cloudFunctionKind functionType, std::string argsMessage);
-cloudError_t cloudMalloc(int socketID, void ** cloudPtr, size_t size);
-cloudError_t cloudMemcpy(int socketID,  void *  dst,  const void *  src,  size_t  count, enum cloudMemcpyKind directionKind, enum cloudCompressionKind compressKind);
-cloudError_t cloudFree(int socketID, void * cloudPtr);
-cloudError_t cloudFinish( int socketID);
+cloudError_t cloudInit(int portno, char * hostname, TCPSocket & tcpSocket);
+cloudError_t cloudFunctionCall(TCPSocket & tcpSocket, cloudFunctionKind functionType, std::string argsMessage);
+cloudError_t cloudMalloc(TCPSocket & tcpSocket, void ** cloudPtr, size_t size);
+cloudError_t cloudMemcpy(TCPSocket & tcpSocket,  void *  dst,  const void *  src,  size_t  count, enum cloudMemcpyKind directionKind, enum cloudCompressionKind compressKind);
+cloudError_t cloudFree(TCPSocket & tcpSocket, void * cloudPtr);
+cloudError_t cloudFinish(TCPSocket & tcpSocket);
 
 #endif /* ifndef CLOUD_H */
 

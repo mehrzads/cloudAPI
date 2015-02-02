@@ -6,17 +6,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <cblas.h>              /* Basic Linear Algebra I/O */
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <chrono>
 #include <utility>
 #include <math.h>              /* Basic Linear Algebra I/O */
 #include "mpi.h"
-#include "common.h"
+#include "tcpSocket.h"
 #include "compression.h"
 #include "cloudmessage.pb.h" 
-#include "cloudTransfer.h"
 #include "clblas.h"
 #include "scalapack.h"
 #include "server.h"
@@ -32,6 +28,7 @@ FunctionCallMessage functionCallMessage;
 string message;
 string argsMessage;
 
+
 int getRootFactor( int n ) {
     for( int t = sqrt(n); t > 0; t-- ) {
         if( n % t == 0 ) {
@@ -41,64 +38,43 @@ int getRootFactor( int n ) {
     return 1;
 }
 
-void error(const char *msg)
-{
-    perror(msg);
-    exit(1);
-}
 
 
 // Initializing the connection
-int intitializeSocket(int portno, int &sockfd){
+void intitializeSocket(int portno,  TCPSocket  & tcpSocket){
 
-    socklen_t clilen;
-    struct sockaddr_in serv_addr, cli_addr;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) error("ERROR opening socket");
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = htons(portno);
-    if (bind(sockfd, reinterpret_cast<struct sockaddr *>(&serv_addr),
-             sizeof(serv_addr)) < 0) 
-             error("ERROR on binding");
-    listen(sockfd,5);
-    clilen = sizeof(cli_addr);
-    int newsockfd = accept(sockfd, 
-                reinterpret_cast<struct sockaddr *>(&cli_addr), 
-                &clilen);
-    if (newsockfd < 0) error("ERROR on accept");
-    return newsockfd;
+    tcpSocket.setnThreads(4);
+    tcpSocket.serverListen(portno);
     
 }
 
-void handleAllocationMessage(int socketID, string message){
+void handleAllocationMessage(TCPSocket  & tcpSocket, string message){
   sizeMessage.ParseFromString(message);
   void * cloudPtr = malloc(sizeMessage.size());
   pointerMessage.set_messagetype(PointerCommand);
   pointerMessage.set_pointer(reinterpret_cast<int64_t>(cloudPtr));
   pointerMessage.SerializeToString(&message);
-  sendMessage(socketID, message);
+  tcpSocket.sendMessage(message);
 }
 
-void handleGetMessage(int socketID, string message){
+void handleGetMessage(TCPSocket  & tcpSocket, string message){
   transferMessage.ParseFromString(message);
   if (transferMessage.compresskind() == NoCompression)
-    recData(socketID, reinterpret_cast<void *>(transferMessage.pointer()),  transferMessage.size());
+    tcpSocket.recData(reinterpret_cast<void *>(transferMessage.pointer()),  transferMessage.size());
   else{
     unsigned char * compressedData = static_cast<unsigned char *>(malloc(transferMessage.compressedsize()));
     if (!compressedData) printf("Allocation is NULL\n");	     
-    recData(socketID, static_cast<void *>(compressedData),   transferMessage.compressedsize());
+    tcpSocket.recData(static_cast<void *>(compressedData),   transferMessage.compressedsize());
     size_t outputSize = static_cast<size_t>(transferMessage.size());
     decompress(compressedData, transferMessage.compressedsize(), reinterpret_cast<unsigned char *>(transferMessage.pointer()), outputSize, (cloudCompressionKind)transferMessage.compresskind());
     free(compressedData);
   }
 }
 
-void handleSendMessage(int socketID, string message){
+void handleSendMessage(TCPSocket  & tcpSocket, string message){
   transferMessage.ParseFromString(message);
   if (transferMessage.compresskind() == NoCompression)
-    sendData(socketID, reinterpret_cast<void *>(transferMessage.pointer()),  transferMessage.size());
+    tcpSocket.sendData(reinterpret_cast<void *>(transferMessage.pointer()),  transferMessage.size());
   else{
     size_t compressedSize = getMaxLength(transferMessage.size(), (cloudCompressionKind)transferMessage.compresskind());
     unsigned char *compressedData = static_cast<unsigned char *>(malloc(compressedSize));
@@ -107,8 +83,8 @@ void handleSendMessage(int socketID, string message){
     sizeMessage.set_messagetype(SizeCommand);
     sizeMessage.set_size(compressedSize);
     sizeMessage.SerializeToString(&message);
-    sendMessage(socketID, message);
-    sendData(socketID, compressedData, compressedSize);
+    tcpSocket.sendMessage(message);
+    tcpSocket.sendData(compressedData, compressedSize);
     free(compressedData);
   }
 }
@@ -125,9 +101,8 @@ void handleFunctionCallMessage(string message, string argsMessage, MPIInfo mpiIn
   }
 }
 
-void handleCloseMessage(int socketID, int socketID2){
-   close(socketID);
-   close(socketID2);
+void handleCloseMessage(TCPSocket  & tcpSocket){
+   tcpSocket.closeSocket();
 }
 
 
@@ -184,15 +159,15 @@ void broadcastString(bool root, std::string& strg) {
 void monitor(int portno){
     MPIInfo mpiInfo;
     MPIInitialize(mpiInfo);
-    int sockfd, newsockfd;
+    TCPSocket socket;
     int commandKind;
     bool rootProc = (mpiInfo.rank == 0);
     
-    if (rootProc) newsockfd = intitializeSocket(portno, sockfd);
+    if (rootProc) intitializeSocket(portno, socket);
       bool listen = true;
       while(listen){
 	if (rootProc){
-	  recMessage(newsockfd, message);
+	  socket.recMessage(message);
 	  baseMessage.ParseFromString(message);	
 	  commandKind = baseMessage.messagetype();
 	}
@@ -200,18 +175,18 @@ void monitor(int portno){
 	switch(commandKind){
 	  // Allocating in the memory
 	  case AllocCommand:
-	    if (rootProc) handleAllocationMessage(newsockfd, message);
+	    if (rootProc) handleAllocationMessage(socket, message);
 	    break;
 	  // Recieving the data from the client  
 	  case GetCommand:
-	    if (rootProc) handleGetMessage(newsockfd, message);
+	    if (rootProc) handleGetMessage(socket, message);
 	    break;
 	  // Sending data to the client  
 	  case SendCommand:
-	    if (rootProc) handleSendMessage(newsockfd, message);
+	    if (rootProc) handleSendMessage(socket, message);
 	    break;
 	  case FunctionCallCommand:
-	    if (rootProc) recMessage(newsockfd, argsMessage);
+	    if (rootProc) socket.recMessage(argsMessage);
 	    broadcastString(rootProc, message);
 	    broadcastString(rootProc, argsMessage);
 	    handleFunctionCallMessage(message, argsMessage, mpiInfo);
@@ -222,7 +197,7 @@ void monitor(int portno){
 	    break;
 	  // Closing the connection  
 	  case CloseCommand:
-	    if (rootProc) handleCloseMessage(newsockfd, sockfd);
+	    if (rootProc) handleCloseMessage(socket);
 	    listen = false;
 	    MPIClose(mpiInfo);
 	    break;

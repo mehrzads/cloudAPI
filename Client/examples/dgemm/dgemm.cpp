@@ -21,8 +21,9 @@
 
 int main(int argc, char *argv[])
 {
-  int sockfd, portno;
+  int portno;
   
+  TCPSocket socket;
   // Reading the arguments
   if (argc < 3) {
      fprintf(stderr,"usage %s hostname port\n", argv[0]);
@@ -34,16 +35,16 @@ int main(int argc, char *argv[])
   double * c_A;
   double * c_B;
   double * c_C;
-  cloudInit(portno, hostname, sockfd);
+  cloudInit(portno, hostname, socket);
   int N = 8192;
   int size = N * N;
   double * A = (double *) malloc( size * sizeof(double));
   double * B = (double *) malloc( size * sizeof(double));
   double * C = (double *) malloc( size * sizeof(double));
   double * C_ref = (double *) malloc( size * sizeof(double));
-  cloudMalloc(sockfd, (void **)&c_A, size * sizeof(double));
-  cloudMalloc(sockfd, (void **)&c_B, size * sizeof(double));
-  cloudMalloc(sockfd, (void **)&c_C, size * sizeof(double));
+  cloudMalloc(socket, (void **)&c_A, size * sizeof(double));
+  cloudMalloc(socket, (void **)&c_B, size * sizeof(double));
+  cloudMalloc(socket, (void **)&c_C, size * sizeof(double));
     
   for (int i = 0; i < size; i++){
       A[i] = double(rand())/INT_MAX;
@@ -55,13 +56,13 @@ int main(int argc, char *argv[])
   CloudTimer cloudTimer;
   cloudTimer.start();
   
-  cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(double), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
-  cloudMemcpy(sockfd,  c_B,  B,  size * sizeof(double), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
+  cloudMemcpy(socket,  c_A,  A,  size * sizeof(double), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
+  cloudMemcpy(socket,  c_B,  B,  size * sizeof(double), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
   
  // matrixMultiply(sockfd, N, N, N , c_A, c_B, c_C);
-  cloudDgemm(sockfd, ClblasRowMajor, ClblasNoTrans, ClblasNoTrans, N, N, N, 1.0, c_A, N, c_B, N, 0.0, c_C, N);
+  cloudDgemm(socket, ClblasRowMajor, ClblasNoTrans, ClblasNoTrans, N, N, N, 1.0, c_A, N, c_B, N, 0.0, c_C, N);
   
-  cloudMemcpy(sockfd,  C,  c_C,  size * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
+  cloudMemcpy(socket,  C,  c_C,  size * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
   
   cloudTimer.end();    
   double time_in_seconds = cloudTimer.getDurationInSeconds();
@@ -141,9 +142,9 @@ int main(int argc, char *argv[])
   free(B);
   free(C);
   free(C_ref);
-  cloudFree(sockfd, c_A);
-  cloudFree(sockfd, c_B);
-  cloudFree(sockfd, c_C);
-  cloudFinish(sockfd);
+  cloudFree(socket, c_A);
+  cloudFree(socket, c_B);
+  cloudFree(socket, c_C);
+  cloudFinish(socket);
   return 0;
 }

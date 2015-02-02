@@ -16,7 +16,7 @@
 
 int main(int argc, char *argv[])
 {
-  int sockfd;
+  TCPSocket socket;
   
   // Reading the arguments
   if (argc < 3) {
@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
   int size = atoi(argv[3]);
 
   float * c_A;
-  cloudInit(portno, hostname, sockfd);
+  cloudInit(portno, hostname, socket);
   float * A = (float *) malloc( size * sizeof(float));
   float * C = (float *) malloc( size * sizeof(float));
-  cloudMalloc(sockfd, (void **)&c_A, size * sizeof(float));
+  cloudMalloc(socket, (void **)&c_A, size * sizeof(float));
     
   for (int i = 0; i < size; i++){
       A[i] = float(rand())/INT_MAX;
@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
   CloudTimer cloudTimer;
   cloudTimer.start();
   
-  cloudMemcpy(sockfd,  c_A,  A,  size * sizeof(float), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
-  cloudMemcpy(sockfd,  C,  c_A,  size * sizeof(float), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
+  cloudMemcpy(socket,  c_A,  A,  size * sizeof(float), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
+  cloudMemcpy(socket,  C,  c_A,  size * sizeof(float), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
   
   cloudTimer.end();    
   double time_in_seconds = cloudTimer.getDurationInSeconds();
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
   free(A);
   free(C);
-  cloudFree(sockfd, c_A);
-  cloudFinish(sockfd);
+  cloudFree(socket, c_A);
+  cloudFinish(socket);
   return 0;
 }

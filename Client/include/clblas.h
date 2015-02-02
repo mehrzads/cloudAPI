@@ -10,7 +10,7 @@
 #include "common.h"
 
 
-cloudError_t cloudDgemm(int socketID, 
+cloudError_t cloudDgemm(TCPSocket & socketID, 
     CLBLAS_ORDER Order, 
     CLBLAS_TRANSPOSE TRANSA,  
     CLBLAS_TRANSPOSE TRANSB, 

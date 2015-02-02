@@ -6,7 +6,7 @@
 using namespace clblasargs;
 
 
-cloudError_t cloudDgemm(int socketID, CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRANSPOSE TRANSB, 
+cloudError_t cloudDgemm(TCPSocket & socketID, CLBLAS_ORDER Order, CLBLAS_TRANSPOSE TRANSA, CLBLAS_TRANSPOSE TRANSB, 
     int M, int N, int K, 
     double ALPHA, 
     double * A, int LDA, 

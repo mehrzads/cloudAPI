@@ -1,6 +1,7 @@
 /*
  * $Id$
  */
+#include "tcpSocket.h"
 #ifndef COMMON_H
 #  define COMMON_H
 enum cloudMemcpyKind{
