@@ -109,7 +109,7 @@ void *TCPSocket::recThread(void *arg){
 }
 
 cloudError_t TCPSocket::sendData( void * data, size_t size){
-   size_t step = size * sizeof(float) / nThreads;
+   size_t step = size / nThreads;
    int thread_cr_res = 0, thread_join_res;
 
   for(unsigned int i = 0; i < nThreads; i++){
@@ -136,7 +136,7 @@ cloudError_t TCPSocket::sendData( void * data, size_t size){
 }
 
 cloudError_t TCPSocket::recData(void * data, size_t size){
-   size_t step = size * sizeof(float) / nThreads;
+   size_t step = size / nThreads;
 
    int thread_cr_res = 0, thread_join_res;
   for(unsigned int i = 0; i < nThreads; i++){
