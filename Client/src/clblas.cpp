@@ -12,7 +12,8 @@ cloudError_t cloudDgemm(TCPSocket & socketID, CLBLAS_ORDER Order, CLBLAS_TRANSPO
     double * A, int LDA, 
     double * B, int LDB, 
     double BETA, 
-    double * C, int LDC){
+    double * C, int LDC)
+{
   std::string message;
   DGEMMMessage dgemmMessage;
   dgemmMessage.set_order(Order);

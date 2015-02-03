@@ -1,9 +1,9 @@
 /*
  * $Id$
  */
-#include "tcpSocket.h"
 #ifndef COMMON_H
 #  define COMMON_H
+#define N_TCP_THREADS 4
 enum cloudMemcpyKind{
    cloudMemcpyClientToCloud,
    cloudMemcpyCloudToClient

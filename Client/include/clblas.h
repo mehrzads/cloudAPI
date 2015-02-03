@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "common.h"
+#include "tcpSocket.h"
 
 
 cloudError_t cloudDgemm(TCPSocket & socketID, 

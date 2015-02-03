@@ -40,10 +40,8 @@ int getRootFactor( int n ) {
 
 // Initializing the connection
 void intitializeSocket(int portno,  TCPSocket  & tcpSocket){
-
-    tcpSocket.setnThreads(4);
-    tcpSocket.serverListen(portno);
-    
+  tcpSocket.setnThreads(N_TCP_THREADS);
+  tcpSocket.serverListen(portno);
 }
 
 void handleAllocationMessage(TCPSocket  & tcpSocket, string message){
@@ -100,107 +98,106 @@ void handleFunctionCallMessage(string message, string argsMessage, MPIInfo mpiIn
 }
 
 void handleCloseMessage(TCPSocket  & tcpSocket){
-   tcpSocket.closeSocket();
+  tcpSocket.closeSocket();
 }
 
 
 void handleFreeMessage(string message){
-   pointerMessage.ParseFromString(message);
-   free(reinterpret_cast<void *>(pointerMessage.pointer()));
+  pointerMessage.ParseFromString(message);
+  free(reinterpret_cast<void *>(pointerMessage.pointer()));
 }
 
 
 void MPIInitialize(MPIInfo & info){
-    blacs_pinfo( &info.rank, &info.nProcs );
+  blacs_pinfo( &info.rank, &info.nProcs );
 
 
-    info.nRows = getRootFactor(info.nProcs);
-    info.nCols = info.nProcs / info.nRows;
+  info.nRows = getRootFactor(info.nProcs);
+  info.nCols = info.nProcs / info.nRows;
 
-    int system = blacs_get( -1, 0 );
-    info.grid = blacs_gridinit( system, true, info.nRows, info.nCols );
+  int system = blacs_get( -1, 0 );
+  info.grid = blacs_gridinit( system, true, info.nRows, info.nCols );
 
-    blacs_gridinfo( info.grid, info.nRows, info.nCols, &info.myRow, &info.myCol );
+  blacs_gridinfo( info.grid, info.nRows, info.nCols, &info.myRow, &info.myCol );
 
-    if( info.myRow >= info.nRows || info.myCol >= info.nCols ) {
-        blacs_gridexit( info.grid );
-        blacs_exit(0);
-        exit(0);
-    }
+  if( info.myRow >= info.nRows || info.myCol >= info.nCols ) {
+      blacs_gridexit( info.grid );
+      blacs_exit(0);
+      exit(0);
+  }
 }
 
 void MPIClose(MPIInfo info){
-    blacs_gridexit(info.grid );
-    blacs_exit(0);
+  blacs_gridexit(info.grid );
+  blacs_exit(0);
 }
 
 void broadcastString(bool root, std::string& strg) {
- 
-   if (root) {
-     int length = strg.size();
-     MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
-     char* cstr = const_cast<char*>(strg.c_str());
-     MPI_Bcast(cstr, strg.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
-   }
-   else {
-     int length;
-     MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
-     char* charstr = new char[length+1];
-     MPI_Bcast(charstr, length, MPI_CHAR, 0, MPI_COMM_WORLD);
-     strg = string(charstr, length);
-     delete [] charstr;
-   }
- 
-   return;
+  if (root) {
+    int length = strg.size();
+    MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    char* cstr = const_cast<char*>(strg.c_str());
+    MPI_Bcast(cstr, strg.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
+  }
+  else {
+    int length;
+    MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    char* charstr = new char[length+1];
+    MPI_Bcast(charstr, length, MPI_CHAR, 0, MPI_COMM_WORLD);
+    strg = string(charstr, length);
+    delete [] charstr;
+  }
+
+  return;
 }
 
 void monitor(int portno){
-    MPIInfo mpiInfo;
-    MPIInitialize(mpiInfo);
-    TCPSocket socket;
-    int commandKind;
-    bool rootProc = (mpiInfo.rank == 0);
-    
-    if (rootProc) intitializeSocket(portno, socket);
-      bool listen = true;
-      while(listen){
-	if (rootProc){
-	  socket.recMessage(message);
-	  baseMessage.ParseFromString(message);	
-	  commandKind = baseMessage.messagetype();
-	}
-	MPI_Bcast(&commandKind, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	switch(commandKind){
-	  // Allocating in the memory
-	  case AllocCommand:
-	    if (rootProc) handleAllocationMessage(socket, message);
-	    break;
-	  // Recieving the data from the client  
-	  case GetCommand:
-	    if (rootProc) handleGetMessage(socket, message);
-	    break;
-	  // Sending data to the client  
-	  case SendCommand:
-	    if (rootProc) handleSendMessage(socket, message);
-	    break;
-	  case FunctionCallCommand:
-	    if (rootProc) socket.recMessage(argsMessage);
-	    broadcastString(rootProc, message);
-	    broadcastString(rootProc, argsMessage);
-	    handleFunctionCallMessage(message, argsMessage, mpiInfo);
-	    break;
-	  // Freeing the memory
-	  case FreeCommand:
-	    if (rootProc) handleFreeMessage(message);
-	    break;
-	  // Closing the connection  
-	  case CloseCommand:
-	    if (rootProc) handleCloseMessage(socket);
-	    listen = false;
-	    MPIClose(mpiInfo);
-	    break;
-	}
+  MPIInfo mpiInfo;
+  MPIInitialize(mpiInfo);
+  TCPSocket socket;
+  int commandKind;
+  bool rootProc = (mpiInfo.rank == 0);
+  
+  if (rootProc) intitializeSocket(portno, socket);
+    bool listen = true;
+    while(listen){
+      if (rootProc){
+        socket.recMessage(message);
+        baseMessage.ParseFromString(message);	
+        commandKind = baseMessage.messagetype();
       }
+      MPI_Bcast(&commandKind, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      switch(commandKind){
+        // Allocating in the memory
+        case AllocCommand:
+          if (rootProc) handleAllocationMessage(socket, message);
+          break;
+        // Recieving the data from the client  
+        case GetCommand:
+          if (rootProc) handleGetMessage(socket, message);
+          break;
+        // Sending data to the client  
+        case SendCommand:
+          if (rootProc) handleSendMessage(socket, message);
+          break;
+        case FunctionCallCommand:
+          if (rootProc) socket.recMessage(argsMessage);
+          broadcastString(rootProc, message);
+          broadcastString(rootProc, argsMessage);
+          handleFunctionCallMessage(message, argsMessage, mpiInfo);
+          break;
+        // Freeing the memory
+        case FreeCommand:
+          if (rootProc) handleFreeMessage(message);
+          break;
+        // Closing the connection  
+        case CloseCommand:
+          if (rootProc) handleCloseMessage(socket);
+          listen = false;
+          MPIClose(mpiInfo);
+          break;
+      }
+    }
 
 }
 
@@ -208,11 +205,11 @@ void monitor(int portno){
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        fprintf(stderr,"ERROR, no port provided\n");
-        exit(1);
-    }
-    int portno = atoi(argv[1]);
-    monitor(portno);
-    return 0; 
+  if (argc < 2) {
+      fprintf(stderr,"ERROR, no port provided\n");
+      exit(1);
+  }
+  int portno = atoi(argv[1]);
+  monitor(portno);
+  return 0; 
 }
