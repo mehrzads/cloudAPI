@@ -85,24 +85,21 @@ int main(int argc, char **argv) {
   TCPSocket socket;
   
   // Reading the arguments
-  if (argc < 3) {
-     fprintf(stderr,"usage %s hostname port\n", argv[0]);
-     exit(0);
-  }
-  char * hostname = argv[1];
-  int portno = atoi(argv[2]);
-  int size = atoi(argv[3]);
     // Check for valid command line arguments, print usage
     // if no arguments were given.
-    if (argc < 2) {
-        cout << "usage: " << argv[0] << " <csv.ext> <output_folder> <threads_per_core>" << endl;
+    if (argc < 5) {
+        cout << "usage: " << argv[0] << " <hostname> <port> <csv.ext> <output_folder> " << endl;
         exit(1);
     }
-    if (argc == 3) {
-        output_folder = string(argv[2]);
+    char * hostname = argv[1];
+    int portno = atoi(argv[2]);
+    if (argc == 5) {
+
+        output_folder = string(argv[4]);
     }
     // Get the path to your CSV.
-    string fn_csv = string(argv[1]);
+    string fn_csv = string(argv[3]);
+    cloudInit(portno, hostname, socket);
     // Read in the data. This can fail if no valid
     // input filename is given.
     begin = std::chrono::high_resolution_clock::now();
@@ -170,7 +167,6 @@ int main(int argc, char **argv) {
     
     cloudTimer.end();    
     double time_in_seconds = cloudTimer.getDurationInSeconds();
-    printf("Transfer rate %f Gbps\n", (size * sizeof(float) * 8 * 2 )/(1024 * 1024 *1024 *time_in_seconds) );
 
 
 
@@ -243,5 +239,6 @@ int main(int argc, char **argv) {
     if(argc == 2) {
         waitKey(0);
     }
+  cloudFinish(socket);
   return 0;
 }
