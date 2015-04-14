@@ -445,6 +445,34 @@ void CommonMessage::InternalSwap(CommonMessage* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// CommonMessage
+
+// required int32 messagetype = 1;
+ bool CommonMessage::has_messagetype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void CommonMessage::set_has_messagetype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void CommonMessage::clear_has_messagetype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void CommonMessage::clear_messagetype() {
+  messagetype_ = 0;
+  clear_has_messagetype();
+}
+ ::google::protobuf::int32 CommonMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.CommonMessage.messagetype)
+  return messagetype_;
+}
+ void CommonMessage::set_messagetype(::google::protobuf::int32 value) {
+  set_has_messagetype();
+  messagetype_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.CommonMessage.messagetype)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -513,19 +541,17 @@ SizeMessage* SizeMessage::New(::google::protobuf::Arena* arena) const {
 }
 
 void SizeMessage::Clear() {
-#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
-  &reinterpret_cast<SizeMessage*>(16)->f) - \
-   reinterpret_cast<char*>(16))
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<SizeMessage*>(16)->f)
 
-#define ZR_(first, last) do {                              \
-    size_t f = OFFSET_OF_FIELD_(first);                    \
-    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
-    ::memset(&first, 0, n);                                \
-  } while (0)
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
 
   ZR_(messagetype_, size_);
 
-#undef OFFSET_OF_FIELD_
+#undef ZR_HELPER_
 #undef ZR_
 
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -748,6 +774,58 @@ void SizeMessage::InternalSwap(SizeMessage* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// SizeMessage
+
+// required int32 messagetype = 1;
+ bool SizeMessage::has_messagetype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void SizeMessage::set_has_messagetype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void SizeMessage::clear_has_messagetype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void SizeMessage::clear_messagetype() {
+  messagetype_ = 0;
+  clear_has_messagetype();
+}
+ ::google::protobuf::int32 SizeMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.SizeMessage.messagetype)
+  return messagetype_;
+}
+ void SizeMessage::set_messagetype(::google::protobuf::int32 value) {
+  set_has_messagetype();
+  messagetype_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.SizeMessage.messagetype)
+}
+
+// required int32 size = 2;
+ bool SizeMessage::has_size() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+ void SizeMessage::set_has_size() {
+  _has_bits_[0] |= 0x00000002u;
+}
+ void SizeMessage::clear_has_size() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+ void SizeMessage::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+ ::google::protobuf::int32 SizeMessage::size() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.SizeMessage.size)
+  return size_;
+}
+ void SizeMessage::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.SizeMessage.size)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -816,19 +894,17 @@ PointerMessage* PointerMessage::New(::google::protobuf::Arena* arena) const {
 }
 
 void PointerMessage::Clear() {
-#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
-  &reinterpret_cast<PointerMessage*>(16)->f) - \
-   reinterpret_cast<char*>(16))
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<PointerMessage*>(16)->f)
 
-#define ZR_(first, last) do {                              \
-    size_t f = OFFSET_OF_FIELD_(first);                    \
-    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
-    ::memset(&first, 0, n);                                \
-  } while (0)
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
 
   ZR_(pointer_, messagetype_);
 
-#undef OFFSET_OF_FIELD_
+#undef ZR_HELPER_
 #undef ZR_
 
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1051,6 +1127,58 @@ void PointerMessage::InternalSwap(PointerMessage* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// PointerMessage
+
+// required int32 messagetype = 1;
+ bool PointerMessage::has_messagetype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void PointerMessage::set_has_messagetype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void PointerMessage::clear_has_messagetype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void PointerMessage::clear_messagetype() {
+  messagetype_ = 0;
+  clear_has_messagetype();
+}
+ ::google::protobuf::int32 PointerMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.PointerMessage.messagetype)
+  return messagetype_;
+}
+ void PointerMessage::set_messagetype(::google::protobuf::int32 value) {
+  set_has_messagetype();
+  messagetype_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.PointerMessage.messagetype)
+}
+
+// required int64 pointer = 2;
+ bool PointerMessage::has_pointer() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+ void PointerMessage::set_has_pointer() {
+  _has_bits_[0] |= 0x00000002u;
+}
+ void PointerMessage::clear_has_pointer() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+ void PointerMessage::clear_pointer() {
+  pointer_ = GOOGLE_LONGLONG(0);
+  clear_has_pointer();
+}
+ ::google::protobuf::int64 PointerMessage::pointer() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.PointerMessage.pointer)
+  return pointer_;
+}
+ void PointerMessage::set_pointer(::google::protobuf::int64 value) {
+  set_has_pointer();
+  pointer_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.PointerMessage.pointer)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -1119,19 +1247,17 @@ FunctionCallMessage* FunctionCallMessage::New(::google::protobuf::Arena* arena) 
 }
 
 void FunctionCallMessage::Clear() {
-#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
-  &reinterpret_cast<FunctionCallMessage*>(16)->f) - \
-   reinterpret_cast<char*>(16))
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<FunctionCallMessage*>(16)->f)
 
-#define ZR_(first, last) do {                              \
-    size_t f = OFFSET_OF_FIELD_(first);                    \
-    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
-    ::memset(&first, 0, n);                                \
-  } while (0)
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
 
   ZR_(messagetype_, functiontype_);
 
-#undef OFFSET_OF_FIELD_
+#undef ZR_HELPER_
 #undef ZR_
 
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1354,6 +1480,58 @@ void FunctionCallMessage::InternalSwap(FunctionCallMessage* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// FunctionCallMessage
+
+// required int32 messagetype = 1;
+ bool FunctionCallMessage::has_messagetype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void FunctionCallMessage::set_has_messagetype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void FunctionCallMessage::clear_has_messagetype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void FunctionCallMessage::clear_messagetype() {
+  messagetype_ = 0;
+  clear_has_messagetype();
+}
+ ::google::protobuf::int32 FunctionCallMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.FunctionCallMessage.messagetype)
+  return messagetype_;
+}
+ void FunctionCallMessage::set_messagetype(::google::protobuf::int32 value) {
+  set_has_messagetype();
+  messagetype_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.FunctionCallMessage.messagetype)
+}
+
+// required int32 functiontype = 2;
+ bool FunctionCallMessage::has_functiontype() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+ void FunctionCallMessage::set_has_functiontype() {
+  _has_bits_[0] |= 0x00000002u;
+}
+ void FunctionCallMessage::clear_has_functiontype() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+ void FunctionCallMessage::clear_functiontype() {
+  functiontype_ = 0;
+  clear_has_functiontype();
+}
+ ::google::protobuf::int32 FunctionCallMessage::functiontype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.FunctionCallMessage.functiontype)
+  return functiontype_;
+}
+ void FunctionCallMessage::set_functiontype(::google::protobuf::int32 value) {
+  set_has_functiontype();
+  functiontype_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.FunctionCallMessage.functiontype)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -1428,21 +1606,19 @@ TransferMessage* TransferMessage::New(::google::protobuf::Arena* arena) const {
 }
 
 void TransferMessage::Clear() {
-#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
-  &reinterpret_cast<TransferMessage*>(16)->f) - \
-   reinterpret_cast<char*>(16))
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<TransferMessage*>(16)->f)
 
-#define ZR_(first, last) do {                              \
-    size_t f = OFFSET_OF_FIELD_(first);                    \
-    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
-    ::memset(&first, 0, n);                                \
-  } while (0)
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
 
   if (_has_bits_[0 / 32] & 31) {
     ZR_(messagetype_, pointer_);
   }
 
-#undef OFFSET_OF_FIELD_
+#undef ZR_HELPER_
 #undef ZR_
 
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1788,6 +1964,130 @@ void TransferMessage::InternalSwap(TransferMessage* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// TransferMessage
+
+// required int32 messagetype = 1;
+ bool TransferMessage::has_messagetype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void TransferMessage::set_has_messagetype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void TransferMessage::clear_has_messagetype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void TransferMessage::clear_messagetype() {
+  messagetype_ = 0;
+  clear_has_messagetype();
+}
+ ::google::protobuf::int32 TransferMessage::messagetype() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.messagetype)
+  return messagetype_;
+}
+ void TransferMessage::set_messagetype(::google::protobuf::int32 value) {
+  set_has_messagetype();
+  messagetype_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.messagetype)
+}
+
+// required int32 compresskind = 2;
+ bool TransferMessage::has_compresskind() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+ void TransferMessage::set_has_compresskind() {
+  _has_bits_[0] |= 0x00000002u;
+}
+ void TransferMessage::clear_has_compresskind() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+ void TransferMessage::clear_compresskind() {
+  compresskind_ = 0;
+  clear_has_compresskind();
+}
+ ::google::protobuf::int32 TransferMessage::compresskind() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.compresskind)
+  return compresskind_;
+}
+ void TransferMessage::set_compresskind(::google::protobuf::int32 value) {
+  set_has_compresskind();
+  compresskind_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.compresskind)
+}
+
+// required int32 size = 3;
+ bool TransferMessage::has_size() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+ void TransferMessage::set_has_size() {
+  _has_bits_[0] |= 0x00000004u;
+}
+ void TransferMessage::clear_has_size() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+ void TransferMessage::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+ ::google::protobuf::int32 TransferMessage::size() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.size)
+  return size_;
+}
+ void TransferMessage::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.size)
+}
+
+// required int32 compressedsize = 4;
+ bool TransferMessage::has_compressedsize() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+ void TransferMessage::set_has_compressedsize() {
+  _has_bits_[0] |= 0x00000008u;
+}
+ void TransferMessage::clear_has_compressedsize() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+ void TransferMessage::clear_compressedsize() {
+  compressedsize_ = 0;
+  clear_has_compressedsize();
+}
+ ::google::protobuf::int32 TransferMessage::compressedsize() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.compressedsize)
+  return compressedsize_;
+}
+ void TransferMessage::set_compressedsize(::google::protobuf::int32 value) {
+  set_has_compressedsize();
+  compressedsize_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.compressedsize)
+}
+
+// required int64 pointer = 5;
+ bool TransferMessage::has_pointer() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+ void TransferMessage::set_has_pointer() {
+  _has_bits_[0] |= 0x00000010u;
+}
+ void TransferMessage::clear_has_pointer() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+ void TransferMessage::clear_pointer() {
+  pointer_ = GOOGLE_LONGLONG(0);
+  clear_has_pointer();
+}
+ ::google::protobuf::int64 TransferMessage::pointer() const {
+  // @@protoc_insertion_point(field_get:cloudmessaging.TransferMessage.pointer)
+  return pointer_;
+}
+ void TransferMessage::set_pointer(::google::protobuf::int64 value) {
+  set_has_pointer();
+  pointer_ = value;
+  // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.pointer)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // @@protoc_insertion_point(namespace_scope)
 

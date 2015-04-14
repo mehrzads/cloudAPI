@@ -212,15 +212,13 @@ DGEMMMessage* DGEMMMessage::New(::google::protobuf::Arena* arena) const {
 }
 
 void DGEMMMessage::Clear() {
-#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
-  &reinterpret_cast<DGEMMMessage*>(16)->f) - \
-   reinterpret_cast<char*>(16))
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<DGEMMMessage*>(16)->f)
 
-#define ZR_(first, last) do {                              \
-    size_t f = OFFSET_OF_FIELD_(first);                    \
-    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
-    ::memset(&first, 0, n);                                \
-  } while (0)
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
 
   if (_has_bits_[0 / 32] & 255) {
     ZR_(order_, a_);
@@ -229,7 +227,7 @@ void DGEMMMessage::Clear() {
     ZR_(b_, ldc_);
   }
 
-#undef OFFSET_OF_FIELD_
+#undef ZR_HELPER_
 #undef ZR_
 
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -938,6 +936,346 @@ void DGEMMMessage::InternalSwap(DGEMMMessage* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// DGEMMMessage
+
+// required int32 order = 1;
+ bool DGEMMMessage::has_order() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void DGEMMMessage::set_has_order() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void DGEMMMessage::clear_has_order() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void DGEMMMessage::clear_order() {
+  order_ = 0;
+  clear_has_order();
+}
+ ::google::protobuf::int32 DGEMMMessage::order() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.order)
+  return order_;
+}
+ void DGEMMMessage::set_order(::google::protobuf::int32 value) {
+  set_has_order();
+  order_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.order)
+}
+
+// required int32 transA = 2;
+ bool DGEMMMessage::has_transa() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+ void DGEMMMessage::set_has_transa() {
+  _has_bits_[0] |= 0x00000002u;
+}
+ void DGEMMMessage::clear_has_transa() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+ void DGEMMMessage::clear_transa() {
+  transa_ = 0;
+  clear_has_transa();
+}
+ ::google::protobuf::int32 DGEMMMessage::transa() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.transA)
+  return transa_;
+}
+ void DGEMMMessage::set_transa(::google::protobuf::int32 value) {
+  set_has_transa();
+  transa_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.transA)
+}
+
+// required int32 transB = 3;
+ bool DGEMMMessage::has_transb() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+ void DGEMMMessage::set_has_transb() {
+  _has_bits_[0] |= 0x00000004u;
+}
+ void DGEMMMessage::clear_has_transb() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+ void DGEMMMessage::clear_transb() {
+  transb_ = 0;
+  clear_has_transb();
+}
+ ::google::protobuf::int32 DGEMMMessage::transb() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.transB)
+  return transb_;
+}
+ void DGEMMMessage::set_transb(::google::protobuf::int32 value) {
+  set_has_transb();
+  transb_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.transB)
+}
+
+// required int32 M = 4;
+ bool DGEMMMessage::has_m() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+ void DGEMMMessage::set_has_m() {
+  _has_bits_[0] |= 0x00000008u;
+}
+ void DGEMMMessage::clear_has_m() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+ void DGEMMMessage::clear_m() {
+  m_ = 0;
+  clear_has_m();
+}
+ ::google::protobuf::int32 DGEMMMessage::m() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.M)
+  return m_;
+}
+ void DGEMMMessage::set_m(::google::protobuf::int32 value) {
+  set_has_m();
+  m_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.M)
+}
+
+// required int32 N = 5;
+ bool DGEMMMessage::has_n() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+ void DGEMMMessage::set_has_n() {
+  _has_bits_[0] |= 0x00000010u;
+}
+ void DGEMMMessage::clear_has_n() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+ void DGEMMMessage::clear_n() {
+  n_ = 0;
+  clear_has_n();
+}
+ ::google::protobuf::int32 DGEMMMessage::n() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.N)
+  return n_;
+}
+ void DGEMMMessage::set_n(::google::protobuf::int32 value) {
+  set_has_n();
+  n_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.N)
+}
+
+// required int32 K = 6;
+ bool DGEMMMessage::has_k() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+ void DGEMMMessage::set_has_k() {
+  _has_bits_[0] |= 0x00000020u;
+}
+ void DGEMMMessage::clear_has_k() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+ void DGEMMMessage::clear_k() {
+  k_ = 0;
+  clear_has_k();
+}
+ ::google::protobuf::int32 DGEMMMessage::k() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.K)
+  return k_;
+}
+ void DGEMMMessage::set_k(::google::protobuf::int32 value) {
+  set_has_k();
+  k_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.K)
+}
+
+// required double alpha = 7;
+ bool DGEMMMessage::has_alpha() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+ void DGEMMMessage::set_has_alpha() {
+  _has_bits_[0] |= 0x00000040u;
+}
+ void DGEMMMessage::clear_has_alpha() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+ void DGEMMMessage::clear_alpha() {
+  alpha_ = 0;
+  clear_has_alpha();
+}
+ double DGEMMMessage::alpha() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.alpha)
+  return alpha_;
+}
+ void DGEMMMessage::set_alpha(double value) {
+  set_has_alpha();
+  alpha_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.alpha)
+}
+
+// required int64 A = 8;
+ bool DGEMMMessage::has_a() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+ void DGEMMMessage::set_has_a() {
+  _has_bits_[0] |= 0x00000080u;
+}
+ void DGEMMMessage::clear_has_a() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+ void DGEMMMessage::clear_a() {
+  a_ = GOOGLE_LONGLONG(0);
+  clear_has_a();
+}
+ ::google::protobuf::int64 DGEMMMessage::a() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.A)
+  return a_;
+}
+ void DGEMMMessage::set_a(::google::protobuf::int64 value) {
+  set_has_a();
+  a_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.A)
+}
+
+// required int32 lda = 9;
+ bool DGEMMMessage::has_lda() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+ void DGEMMMessage::set_has_lda() {
+  _has_bits_[0] |= 0x00000100u;
+}
+ void DGEMMMessage::clear_has_lda() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+ void DGEMMMessage::clear_lda() {
+  lda_ = 0;
+  clear_has_lda();
+}
+ ::google::protobuf::int32 DGEMMMessage::lda() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.lda)
+  return lda_;
+}
+ void DGEMMMessage::set_lda(::google::protobuf::int32 value) {
+  set_has_lda();
+  lda_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.lda)
+}
+
+// required int64 B = 10;
+ bool DGEMMMessage::has_b() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+ void DGEMMMessage::set_has_b() {
+  _has_bits_[0] |= 0x00000200u;
+}
+ void DGEMMMessage::clear_has_b() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+ void DGEMMMessage::clear_b() {
+  b_ = GOOGLE_LONGLONG(0);
+  clear_has_b();
+}
+ ::google::protobuf::int64 DGEMMMessage::b() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.B)
+  return b_;
+}
+ void DGEMMMessage::set_b(::google::protobuf::int64 value) {
+  set_has_b();
+  b_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.B)
+}
+
+// required int32 ldb = 11;
+ bool DGEMMMessage::has_ldb() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+ void DGEMMMessage::set_has_ldb() {
+  _has_bits_[0] |= 0x00000400u;
+}
+ void DGEMMMessage::clear_has_ldb() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+ void DGEMMMessage::clear_ldb() {
+  ldb_ = 0;
+  clear_has_ldb();
+}
+ ::google::protobuf::int32 DGEMMMessage::ldb() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.ldb)
+  return ldb_;
+}
+ void DGEMMMessage::set_ldb(::google::protobuf::int32 value) {
+  set_has_ldb();
+  ldb_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.ldb)
+}
+
+// required double beta = 12;
+ bool DGEMMMessage::has_beta() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+ void DGEMMMessage::set_has_beta() {
+  _has_bits_[0] |= 0x00000800u;
+}
+ void DGEMMMessage::clear_has_beta() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+ void DGEMMMessage::clear_beta() {
+  beta_ = 0;
+  clear_has_beta();
+}
+ double DGEMMMessage::beta() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.beta)
+  return beta_;
+}
+ void DGEMMMessage::set_beta(double value) {
+  set_has_beta();
+  beta_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.beta)
+}
+
+// required int64 C = 13;
+ bool DGEMMMessage::has_c() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+ void DGEMMMessage::set_has_c() {
+  _has_bits_[0] |= 0x00001000u;
+}
+ void DGEMMMessage::clear_has_c() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+ void DGEMMMessage::clear_c() {
+  c_ = GOOGLE_LONGLONG(0);
+  clear_has_c();
+}
+ ::google::protobuf::int64 DGEMMMessage::c() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.C)
+  return c_;
+}
+ void DGEMMMessage::set_c(::google::protobuf::int64 value) {
+  set_has_c();
+  c_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.C)
+}
+
+// required int32 ldc = 14;
+ bool DGEMMMessage::has_ldc() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+ void DGEMMMessage::set_has_ldc() {
+  _has_bits_[0] |= 0x00002000u;
+}
+ void DGEMMMessage::clear_has_ldc() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+ void DGEMMMessage::clear_ldc() {
+  ldc_ = 0;
+  clear_has_ldc();
+}
+ ::google::protobuf::int32 DGEMMMessage::ldc() const {
+  // @@protoc_insertion_point(field_get:clblasargs.DGEMMMessage.ldc)
+  return ldc_;
+}
+ void DGEMMMessage::set_ldc(::google::protobuf::int32 value) {
+  set_has_ldc();
+  ldc_ = value;
+  // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.ldc)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // @@protoc_insertion_point(namespace_scope)
 

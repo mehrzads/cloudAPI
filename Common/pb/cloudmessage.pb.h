@@ -109,11 +109,11 @@ class CommonMessage : public ::google::protobuf::Message {
   // accessors -------------------------------------------------------
 
   // required int32 messagetype = 1;
-  inline bool has_messagetype() const;
-  inline void clear_messagetype();
+  bool has_messagetype() const;
+  void clear_messagetype();
   static const int kMessagetypeFieldNumber = 1;
-  inline ::google::protobuf::int32 messagetype() const;
-  inline void set_messagetype(::google::protobuf::int32 value);
+  ::google::protobuf::int32 messagetype() const;
+  void set_messagetype(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:cloudmessaging.CommonMessage)
  private:
@@ -198,18 +198,18 @@ class SizeMessage : public ::google::protobuf::Message {
   // accessors -------------------------------------------------------
 
   // required int32 messagetype = 1;
-  inline bool has_messagetype() const;
-  inline void clear_messagetype();
+  bool has_messagetype() const;
+  void clear_messagetype();
   static const int kMessagetypeFieldNumber = 1;
-  inline ::google::protobuf::int32 messagetype() const;
-  inline void set_messagetype(::google::protobuf::int32 value);
+  ::google::protobuf::int32 messagetype() const;
+  void set_messagetype(::google::protobuf::int32 value);
 
   // required int32 size = 2;
-  inline bool has_size() const;
-  inline void clear_size();
+  bool has_size() const;
+  void clear_size();
   static const int kSizeFieldNumber = 2;
-  inline ::google::protobuf::int32 size() const;
-  inline void set_size(::google::protobuf::int32 value);
+  ::google::protobuf::int32 size() const;
+  void set_size(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:cloudmessaging.SizeMessage)
  private:
@@ -300,18 +300,18 @@ class PointerMessage : public ::google::protobuf::Message {
   // accessors -------------------------------------------------------
 
   // required int32 messagetype = 1;
-  inline bool has_messagetype() const;
-  inline void clear_messagetype();
+  bool has_messagetype() const;
+  void clear_messagetype();
   static const int kMessagetypeFieldNumber = 1;
-  inline ::google::protobuf::int32 messagetype() const;
-  inline void set_messagetype(::google::protobuf::int32 value);
+  ::google::protobuf::int32 messagetype() const;
+  void set_messagetype(::google::protobuf::int32 value);
 
   // required int64 pointer = 2;
-  inline bool has_pointer() const;
-  inline void clear_pointer();
+  bool has_pointer() const;
+  void clear_pointer();
   static const int kPointerFieldNumber = 2;
-  inline ::google::protobuf::int64 pointer() const;
-  inline void set_pointer(::google::protobuf::int64 value);
+  ::google::protobuf::int64 pointer() const;
+  void set_pointer(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:cloudmessaging.PointerMessage)
  private:
@@ -402,18 +402,18 @@ class FunctionCallMessage : public ::google::protobuf::Message {
   // accessors -------------------------------------------------------
 
   // required int32 messagetype = 1;
-  inline bool has_messagetype() const;
-  inline void clear_messagetype();
+  bool has_messagetype() const;
+  void clear_messagetype();
   static const int kMessagetypeFieldNumber = 1;
-  inline ::google::protobuf::int32 messagetype() const;
-  inline void set_messagetype(::google::protobuf::int32 value);
+  ::google::protobuf::int32 messagetype() const;
+  void set_messagetype(::google::protobuf::int32 value);
 
   // required int32 functiontype = 2;
-  inline bool has_functiontype() const;
-  inline void clear_functiontype();
+  bool has_functiontype() const;
+  void clear_functiontype();
   static const int kFunctiontypeFieldNumber = 2;
-  inline ::google::protobuf::int32 functiontype() const;
-  inline void set_functiontype(::google::protobuf::int32 value);
+  ::google::protobuf::int32 functiontype() const;
+  void set_functiontype(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:cloudmessaging.FunctionCallMessage)
  private:
@@ -504,39 +504,39 @@ class TransferMessage : public ::google::protobuf::Message {
   // accessors -------------------------------------------------------
 
   // required int32 messagetype = 1;
-  inline bool has_messagetype() const;
-  inline void clear_messagetype();
+  bool has_messagetype() const;
+  void clear_messagetype();
   static const int kMessagetypeFieldNumber = 1;
-  inline ::google::protobuf::int32 messagetype() const;
-  inline void set_messagetype(::google::protobuf::int32 value);
+  ::google::protobuf::int32 messagetype() const;
+  void set_messagetype(::google::protobuf::int32 value);
 
   // required int32 compresskind = 2;
-  inline bool has_compresskind() const;
-  inline void clear_compresskind();
+  bool has_compresskind() const;
+  void clear_compresskind();
   static const int kCompresskindFieldNumber = 2;
-  inline ::google::protobuf::int32 compresskind() const;
-  inline void set_compresskind(::google::protobuf::int32 value);
+  ::google::protobuf::int32 compresskind() const;
+  void set_compresskind(::google::protobuf::int32 value);
 
   // required int32 size = 3;
-  inline bool has_size() const;
-  inline void clear_size();
+  bool has_size() const;
+  void clear_size();
   static const int kSizeFieldNumber = 3;
-  inline ::google::protobuf::int32 size() const;
-  inline void set_size(::google::protobuf::int32 value);
+  ::google::protobuf::int32 size() const;
+  void set_size(::google::protobuf::int32 value);
 
   // required int32 compressedsize = 4;
-  inline bool has_compressedsize() const;
-  inline void clear_compressedsize();
+  bool has_compressedsize() const;
+  void clear_compressedsize();
   static const int kCompressedsizeFieldNumber = 4;
-  inline ::google::protobuf::int32 compressedsize() const;
-  inline void set_compressedsize(::google::protobuf::int32 value);
+  ::google::protobuf::int32 compressedsize() const;
+  void set_compressedsize(::google::protobuf::int32 value);
 
   // required int64 pointer = 5;
-  inline bool has_pointer() const;
-  inline void clear_pointer();
+  bool has_pointer() const;
+  void clear_pointer();
   static const int kPointerFieldNumber = 5;
-  inline ::google::protobuf::int64 pointer() const;
-  inline void set_pointer(::google::protobuf::int64 value);
+  ::google::protobuf::int64 pointer() const;
+  void set_pointer(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:cloudmessaging.TransferMessage)
  private:
@@ -574,6 +574,7 @@ class TransferMessage : public ::google::protobuf::Message {
 
 // ===================================================================
 
+#if !PROTOBUF_INLINE_NOT_IN_HEADERS
 // CommonMessage
 
 // required int32 messagetype = 1;
@@ -880,19 +881,11 @@ inline void TransferMessage::set_pointer(::google::protobuf::int64 value) {
   // @@protoc_insertion_point(field_set:cloudmessaging.TransferMessage.pointer)
 }
 
+#endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // @@protoc_insertion_point(namespace_scope)
 
 }  // namespace cloudmessaging
-
-#ifndef SWIG
-namespace google {
-namespace protobuf {
-
-
-}  // namespace protobuf
-}  // namespace google
-#endif  // SWIG
 
 // @@protoc_insertion_point(global_scope)
 

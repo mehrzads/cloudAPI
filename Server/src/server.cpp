@@ -12,6 +12,7 @@
 #include "compression.h"
 #include "cloudmessage.pb.h" 
 #include "clblas.h"
+#include "clopencv.h"
 #include "scalapack.h"
 #include "server.h"
 using namespace std;
@@ -90,6 +91,9 @@ void handleFunctionCallMessage(string message, string argsMessage, MPIInfo mpiIn
   switch (functionCallMessage.functiontype()){
     case ClBlasStart ... ClBlasEnd:
       handleClblasFunction(static_cast<cloudFunctionKind>(functionCallMessage.functiontype()), argsMessage, mpiInfo);
+      break;
+    case ClOpenCVStart ... ClOpenCVEnd:
+      handleClOpenCVFunction(static_cast<cloudFunctionKind>(functionCallMessage.functiontype()), argsMessage, mpiInfo);
       break;
     default:
       assert("Wrong function call type" && 0);

@@ -105,102 +105,102 @@ class DGEMMMessage : public ::google::protobuf::Message {
   // accessors -------------------------------------------------------
 
   // required int32 order = 1;
-  inline bool has_order() const;
-  inline void clear_order();
+  bool has_order() const;
+  void clear_order();
   static const int kOrderFieldNumber = 1;
-  inline ::google::protobuf::int32 order() const;
-  inline void set_order(::google::protobuf::int32 value);
+  ::google::protobuf::int32 order() const;
+  void set_order(::google::protobuf::int32 value);
 
   // required int32 transA = 2;
-  inline bool has_transa() const;
-  inline void clear_transa();
+  bool has_transa() const;
+  void clear_transa();
   static const int kTransAFieldNumber = 2;
-  inline ::google::protobuf::int32 transa() const;
-  inline void set_transa(::google::protobuf::int32 value);
+  ::google::protobuf::int32 transa() const;
+  void set_transa(::google::protobuf::int32 value);
 
   // required int32 transB = 3;
-  inline bool has_transb() const;
-  inline void clear_transb();
+  bool has_transb() const;
+  void clear_transb();
   static const int kTransBFieldNumber = 3;
-  inline ::google::protobuf::int32 transb() const;
-  inline void set_transb(::google::protobuf::int32 value);
+  ::google::protobuf::int32 transb() const;
+  void set_transb(::google::protobuf::int32 value);
 
   // required int32 M = 4;
-  inline bool has_m() const;
-  inline void clear_m();
+  bool has_m() const;
+  void clear_m();
   static const int kMFieldNumber = 4;
-  inline ::google::protobuf::int32 m() const;
-  inline void set_m(::google::protobuf::int32 value);
+  ::google::protobuf::int32 m() const;
+  void set_m(::google::protobuf::int32 value);
 
   // required int32 N = 5;
-  inline bool has_n() const;
-  inline void clear_n();
+  bool has_n() const;
+  void clear_n();
   static const int kNFieldNumber = 5;
-  inline ::google::protobuf::int32 n() const;
-  inline void set_n(::google::protobuf::int32 value);
+  ::google::protobuf::int32 n() const;
+  void set_n(::google::protobuf::int32 value);
 
   // required int32 K = 6;
-  inline bool has_k() const;
-  inline void clear_k();
+  bool has_k() const;
+  void clear_k();
   static const int kKFieldNumber = 6;
-  inline ::google::protobuf::int32 k() const;
-  inline void set_k(::google::protobuf::int32 value);
+  ::google::protobuf::int32 k() const;
+  void set_k(::google::protobuf::int32 value);
 
   // required double alpha = 7;
-  inline bool has_alpha() const;
-  inline void clear_alpha();
+  bool has_alpha() const;
+  void clear_alpha();
   static const int kAlphaFieldNumber = 7;
-  inline double alpha() const;
-  inline void set_alpha(double value);
+  double alpha() const;
+  void set_alpha(double value);
 
   // required int64 A = 8;
-  inline bool has_a() const;
-  inline void clear_a();
+  bool has_a() const;
+  void clear_a();
   static const int kAFieldNumber = 8;
-  inline ::google::protobuf::int64 a() const;
-  inline void set_a(::google::protobuf::int64 value);
+  ::google::protobuf::int64 a() const;
+  void set_a(::google::protobuf::int64 value);
 
   // required int32 lda = 9;
-  inline bool has_lda() const;
-  inline void clear_lda();
+  bool has_lda() const;
+  void clear_lda();
   static const int kLdaFieldNumber = 9;
-  inline ::google::protobuf::int32 lda() const;
-  inline void set_lda(::google::protobuf::int32 value);
+  ::google::protobuf::int32 lda() const;
+  void set_lda(::google::protobuf::int32 value);
 
   // required int64 B = 10;
-  inline bool has_b() const;
-  inline void clear_b();
+  bool has_b() const;
+  void clear_b();
   static const int kBFieldNumber = 10;
-  inline ::google::protobuf::int64 b() const;
-  inline void set_b(::google::protobuf::int64 value);
+  ::google::protobuf::int64 b() const;
+  void set_b(::google::protobuf::int64 value);
 
   // required int32 ldb = 11;
-  inline bool has_ldb() const;
-  inline void clear_ldb();
+  bool has_ldb() const;
+  void clear_ldb();
   static const int kLdbFieldNumber = 11;
-  inline ::google::protobuf::int32 ldb() const;
-  inline void set_ldb(::google::protobuf::int32 value);
+  ::google::protobuf::int32 ldb() const;
+  void set_ldb(::google::protobuf::int32 value);
 
   // required double beta = 12;
-  inline bool has_beta() const;
-  inline void clear_beta();
+  bool has_beta() const;
+  void clear_beta();
   static const int kBetaFieldNumber = 12;
-  inline double beta() const;
-  inline void set_beta(double value);
+  double beta() const;
+  void set_beta(double value);
 
   // required int64 C = 13;
-  inline bool has_c() const;
-  inline void clear_c();
+  bool has_c() const;
+  void clear_c();
   static const int kCFieldNumber = 13;
-  inline ::google::protobuf::int64 c() const;
-  inline void set_c(::google::protobuf::int64 value);
+  ::google::protobuf::int64 c() const;
+  void set_c(::google::protobuf::int64 value);
 
   // required int32 ldc = 14;
-  inline bool has_ldc() const;
-  inline void clear_ldc();
+  bool has_ldc() const;
+  void clear_ldc();
   static const int kLdcFieldNumber = 14;
-  inline ::google::protobuf::int32 ldc() const;
-  inline void set_ldc(::google::protobuf::int32 value);
+  ::google::protobuf::int32 ldc() const;
+  void set_ldc(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:clblasargs.DGEMMMessage)
  private:
@@ -265,6 +265,7 @@ class DGEMMMessage : public ::google::protobuf::Message {
 
 // ===================================================================
 
+#if !PROTOBUF_INLINE_NOT_IN_HEADERS
 // DGEMMMessage
 
 // required int32 order = 1;
@@ -603,19 +604,11 @@ inline void DGEMMMessage::set_ldc(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:clblasargs.DGEMMMessage.ldc)
 }
 
+#endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // @@protoc_insertion_point(namespace_scope)
 
 }  // namespace clblasargs
-
-#ifndef SWIG
-namespace google {
-namespace protobuf {
-
-
-}  // namespace protobuf
-}  // namespace google
-#endif  // SWIG
 
 // @@protoc_insertion_point(global_scope)
 

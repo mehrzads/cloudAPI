@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall -std=c++11 -O3
+CFLAGS= -c -Wall -std=c++11 -O3
 LDFLAGS= -lpthread -lz -lsnappy `pkg-config --cflags --libs protobuf`
 EXAMPLES= $(wildcard *.cpp)
 SOURCES= $(EXAMPLES) $(wildcard ../../src/*.cpp) $(wildcard ../../../Common/src/*.cpp)  

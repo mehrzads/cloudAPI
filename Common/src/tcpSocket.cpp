@@ -165,22 +165,33 @@ cloudError_t TCPSocket::recData(void * data, size_t size){
 
 cloudError_t TCPSocket::clientConnect(int portno, char * hostname){
     isServer = false;
-    for (unsigned int i = 0; i < getnThreads(); i++){
+    unsigned int n = getnThreads();
+//    printf("Threads%d\n", n);
+    for (unsigned int i = 0; i < n; i++){
       struct sockaddr_in serv_addr;
       struct hostent *server;
       int socketID = socket(AF_INET, SOCK_STREAM, 0);
-      if (socketID < 0) return CloudErrorOpen;
+      if (socketID < 0) {
+	printf("Open Error\n");
+	return CloudErrorOpen;
+      }
       server = gethostbyname(hostname);
-      if (server == NULL) return CloudErrorNoHost;
+      if (server == NULL) {
+	printf("No Host\n");
+	return CloudErrorNoHost;
+      }
       bzero(reinterpret_cast<char *>(&serv_addr), sizeof(serv_addr));
       serv_addr.sin_family = AF_INET;
       bcopy(static_cast<char *>(server->h_addr), 
 	   reinterpret_cast<char *>(&serv_addr.sin_addr.s_addr),
 	   server->h_length);
       serv_addr.sin_port = htons(portno + i);
-      if (connect(socketID,reinterpret_cast<struct sockaddr *>( &serv_addr),sizeof(serv_addr)) < 0) 
+      if (connect(socketID,reinterpret_cast<struct sockaddr *>( &serv_addr),sizeof(serv_addr)) < 0) {
+	  printf("Error Connection\n");
 	  return CloudErrorConnection;
+      }
       setSocket(socketID, i);
+      printf("SUCCESS\n");
     }
     return CloudSuccess;
 }

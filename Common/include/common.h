@@ -38,7 +38,10 @@ enum cloudCompressionKind{
 enum cloudFunctionKind{
     ClBlasStart = 0,
     ClBlasDGEMM,
-    ClBlasEnd
+    ClBlasEnd,
+    ClOpenCVStart,
+    ClOpenCVFaceTrain,
+    ClOpenCVEnd
 };
 
 
