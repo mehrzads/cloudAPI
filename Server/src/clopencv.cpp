@@ -19,13 +19,31 @@ cloudError_t cloudFaceTrain(int rows, int cols,
     char * images,
     int * labels,
     MPIInfo mpiInfo){
-  Mat imagesMat(rows, cols, CV_64FC1, images);
+  Mat imagesMat(rows, cols, 0, images);
   vector<Mat> imagesVec;
-  for (int i = 0; i <rows; i++)
+  vector<int> labelsVec;
+  for (int i = 0; i <rows; i++){
      imagesVec.push_back(imagesMat.row(i));
+     labelsVec.push_back(labels[i]);
+  }
+
+  for (int i = 0; i < 10; i++)
+	printf("%d\t%d\t%d\t%d\t%d\n",labels[i], images[i], i, imagesMat.data[i], imagesVec[0].data[i]);
+
+  printf("labels.size %d\t images total %d\t images elem %d\n", labelsVec.size(),  imagesMat.total() ,imagesMat.elemSize());
+
   Ptr<FaceRecognizer> model = createEigenFaceRecognizer();
-  vector<int> labelsVec(labels, labels + rows *sizeof(int));
+//  vector<int> labelsVec(labels, labels + rows *sizeof(int));
   model->MPItrain(imagesVec, labelsVec);
+  // Here is how to get the eigenvalues of this Eigenfaces model:
+  Mat eigenvalues = model->getMat("eigenvalues");
+  printf("EigenValues %dX%d %d %d\n", eigenvalues.rows, eigenvalues.cols, eigenvalues.elemSize(), eigenvalues.type()); 
+  // And we can do the same to display the Eigenvectors (read Eigenfaces):
+  Mat W = model->getMat("eigenvectors");
+  printf("EigenVectors %dX%d %d %d\n", W.rows, W.cols, W.elemSize(), W.type()); 
+  // Get the sample mean from the training data
+  Mat mean = model->getMat("mean");
+  printf("mean %dX%d %d %d\n", mean.rows, mean.cols, mean.elemSize(), mean.type()); 
 
   printf("cloud Face Train is called\n");
   return CloudSuccess; 
@@ -37,8 +55,8 @@ cloudError_t handleClOpenCVFunction(cloudFunctionKind functionType, std::string 
        facetrainMessage.ParseFromString(argsMessage);
        cloudFaceTrain(facetrainMessage.rows(),
             facetrainMessage.cols(),
-            reinterpret_cast<char *>(facetrainMessage.labels()),
-            reinterpret_cast<int *>(facetrainMessage.images()),
+            reinterpret_cast<char *>(facetrainMessage.images()),
+            reinterpret_cast<int *>(facetrainMessage.labels()),
 	    mpiInfo
 	    );
        break;
