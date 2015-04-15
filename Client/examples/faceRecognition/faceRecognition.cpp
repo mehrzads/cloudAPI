@@ -153,21 +153,46 @@ int main(int argc, char **argv) {
     begin = std::chrono::high_resolution_clock::now();
     int * c_labels;
     cloudMalloc(socket, (void **)&c_labels, labels.size() * sizeof(int));
-    Mat imagesMat = model->asFaceRowMatrix(images, CV_64FC1);
+    Mat imagesMat = model->asFaceRowMatrix(images, 0);
+
+    printf("Type %d\t Type %d\t \n", imagesMat.type(),  images[0].type());
     char *  c_images; 
     cloudMalloc(socket, (void **)&c_images, imagesMat.total() * imagesMat.elemSize());
+    
+    double *  c_mean; 
+    double *  d_mean; 
+    cloudMalloc(socket, (void **)&c_mean, imagesMat.cols * sizeof(double));
+    d_mean = (double *) malloc(imagesMat.cols * sizeof(double));
+    
+    double *  c_eigenValues; 
+    double *  d_eigenValues; 
+    cloudMalloc(socket, (void **)&c_eigenValues, imagesMat.rows * sizeof(double));
+    d_eigenValues = (double *) malloc(imagesMat.rows * sizeof(double));
 
+    double *  c_eigenVectors; 
+    double *  d_eigenVectors; 
+    cloudMalloc(socket, (void **)&c_eigenVectors, imagesMat.total() * sizeof(double));
+    d_eigenVectors = (double *) malloc(imagesMat.total() * sizeof(double));
+    
     CloudTimer cloudTimer;
     cloudTimer.start();
   
     cloudMemcpy(socket,  c_labels,  &labels[0],  labels.size() * sizeof(int), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
     cloudMemcpy(socket,  c_images,  imagesMat.data,  imagesMat.total() * imagesMat.elemSize(), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
+    
+
+    for (int i = 0; i < 10; i ++)
+      printf("%d\t%d\t%d\n", i , d_images[i], images[0].data[i]);
+    printf("labels.size %d\t images total %d\t images elem %d\n", labels.size(),  imagesMat.total() ,imagesMat.elemSize());
   
-    cloudFaceTrain(socket, imagesMat.rows, imagesMat.cols, c_images, c_labels);
+    cloudFaceTrain(socket, imagesMat.rows, imagesMat.cols, c_images, c_labels, c_eigenValues, c_eigenVectors, c_mean);
     
     cloudTimer.end();    
     double time_in_seconds = cloudTimer.getDurationInSeconds();
 
+    cloudMemcpy(socket,  d_mean,  c_mean,  imagesMat.cols * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
+    cloudMemcpy(socket,  d_eigenValues,  c_eigenValues,  imagesMat.rows * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
+    cloudMemcpy(socket,  d_eigenVectors,  c_eigenVectors,  imagesMat.total() * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
 
 
     end = std::chrono::high_resolution_clock::now();

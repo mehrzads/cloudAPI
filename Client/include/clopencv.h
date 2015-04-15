@@ -10,7 +10,7 @@
 #include "tcpSocket.h"
 
 cloudError_t cloudFaceTrain(TCPSocket & socketID, int rows, int cols, 
-    char * images, int *  labels); 
+    char * images, int *  labels, double * eigenValues, double * eigenVectors, double * mean); 
 
 
 #endif /* ifndef CLOPENCV_H */

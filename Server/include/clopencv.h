@@ -12,6 +12,9 @@
 cloudError_t cloudFaceTrain(int rows, int cols,
     char * images,
     int * labels,
+    double * eigenValues, 
+    double * eigenVectors, 
+    double * mean,
     MPIInfo mpiInfo);
 
 cloudError_t handleClOpenCVFunction(cloudFunctionKind functionType, std::string argsMessage, MPIInfo mpiInfo);

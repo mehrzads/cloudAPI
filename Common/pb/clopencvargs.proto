@@ -8,5 +8,8 @@ message FaceTrainMessage{
   required int32 cols = 2;
   required int64 images = 3;
   required int64 labels = 4;
+  required int64 eigenvalues = 5;
+  required int64 eigenvectors = 6;
+  required int64 mean = 7;
 }
 
