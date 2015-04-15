@@ -151,12 +151,12 @@ int main(int argc, char **argv) {
     //      cv::createEigenFaceRecognizer(0, 123.0);
     //
     begin = std::chrono::high_resolution_clock::now();
+    
     int * c_labels;
     cloudMalloc(socket, (void **)&c_labels, labels.size() * sizeof(int));
-    Mat imagesMat = model->asFaceRowMatrix(images, 0);
 
-    printf("Type %d\t Type %d\t \n", imagesMat.type(),  images[0].type());
     char *  c_images; 
+    Mat imagesMat = model->asFaceRowMatrix(images, 0);
     cloudMalloc(socket, (void **)&c_images, imagesMat.total() * imagesMat.elemSize());
     
     double *  c_mean; 
@@ -185,18 +185,16 @@ int main(int argc, char **argv) {
     cloudMemcpy(socket,  c_labels,  &labels[0],  labels.size() * sizeof(int), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
     cloudMemcpy(socket,  c_images,  imagesMat.data,  imagesMat.total() * imagesMat.elemSize(), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
     
-
-    printf("labels.size %d\t images total %d\t images elem %d\n", labels.size(),  imagesMat.total() ,imagesMat.elemSize());
-  
     cloudFaceTrain(socket, imagesMat.rows, imagesMat.cols, c_images, c_labels, c_eigenValues, c_eigenVectors, c_mean, c_projections);
     
-    cloudTimer.end();    
-    double time_in_seconds = cloudTimer.getDurationInSeconds();
 
     cloudMemcpy(socket,  d_mean,  c_mean,  imagesMat.cols * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
     cloudMemcpy(socket,  d_eigenValues,  c_eigenValues,  imagesMat.rows * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
     cloudMemcpy(socket,  d_eigenVectors,  c_eigenVectors,  imagesMat.total() * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
     cloudMemcpy(socket,  d_projections,  c_projections,   imagesMat.rows * imagesMat.rows * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
+    
+    cloudTimer.end();    
+    double time_in_seconds = cloudTimer.getDurationInSeconds();
 
 
     end = std::chrono::high_resolution_clock::now();
@@ -207,15 +205,14 @@ int main(int argc, char **argv) {
     model->setMat("mean", Mat(1, imagesMat.cols , CV_64FC1, d_mean));
     vector<Mat> projectionsVec;
     for (int i = 0 ; i < imagesMat.rows; i++)
-      projectionsVec.push_back(Mat(1, imagesMat.rows, CV_64FC1, reinterpret_cast<double *>(d_projections) + imagesMat.rows));
+      projectionsVec.push_back(Mat(1, imagesMat.rows, CV_64FC1, reinterpret_cast<double *>(d_projections) +  i * imagesMat.rows));
+    std::cout << projectionsVec[100] << std::endl;
     model->setMatVector("projections", projectionsVec);
+    model->setMat("labels", ((InputArray)labels).getMat());
 
-
-
-//    model->MPItrain(images, labels);
     // The following line predicts the label of a given
     // test image:
-    int predictedLabel = 0;// model->predict(testSample);
+    int predictedLabel =  model->predict(testSample);
     //
     // To get the confidence of a prediction call the model with:
     //
@@ -225,14 +222,6 @@ int main(int argc, char **argv) {
     //
     string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
     cout << result_message << endl;
-    // Here is how to get the eigenvalues of this Eigenfaces model:
-    Mat eigenvalues = model->getMat("eigenvalues");
-    // And we can do the same to display the Eigenvectors (read Eigenfaces):
-    Mat W = model->getMat("eigenvectors");
-    // Get the sample mean from the training data
-    Mat mean = model->getMat("mean");
-
-    std::cout<< eigenvalues <<std::endl;
 
     // Display or save:
     if(argc == 2) {
