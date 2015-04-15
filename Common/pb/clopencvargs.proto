@@ -11,5 +11,6 @@ message FaceTrainMessage{
   required int64 eigenvalues = 5;
   required int64 eigenvectors = 6;
   required int64 mean = 7;
+  required int64 projections = 8;
 }
 

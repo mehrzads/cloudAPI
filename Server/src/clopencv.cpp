@@ -21,6 +21,7 @@ cloudError_t cloudFaceTrain(int rows, int cols,
     double * eigenValues, 
     double * eigenVectors, 
     double * mean,
+    double * projections,
     MPIInfo mpiInfo){
   Mat imagesMat(rows, cols, 0, images);
   vector<Mat> imagesVec;
@@ -54,6 +55,8 @@ cloudError_t cloudFaceTrain(int rows, int cols,
   vector<Mat> projectionsVec = model->getMatVector("projections");
   printf("Projections %d %dX%d %d %d\n", projectionsVec.size(), projectionsVec[0].rows, projectionsVec[0].cols, projectionsVec[0].elemSize(), projectionsVec[0].type());
 
+  Mat projectionsMat = model->asFaceRowMatrix(projectionsVec, CV_64FC1);
+  memcpy(projections, reinterpret_cast<double *>(projectionsMat.data), projectionsMat.total() * projectionsMat.elemSize());
   
 
 
@@ -72,6 +75,7 @@ cloudError_t handleClOpenCVFunction(cloudFunctionKind functionType, std::string 
             reinterpret_cast<double *>(facetrainMessage.eigenvalues()),
             reinterpret_cast<double *>(facetrainMessage.eigenvectors()),
             reinterpret_cast<double *>(facetrainMessage.mean()),
+            reinterpret_cast<double *>(facetrainMessage.projections()),
 	    mpiInfo
 	    );
        break;

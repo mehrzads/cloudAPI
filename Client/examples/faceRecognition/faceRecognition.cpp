@@ -174,6 +174,11 @@ int main(int argc, char **argv) {
     cloudMalloc(socket, (void **)&c_eigenVectors, imagesMat.total() * sizeof(double));
     d_eigenVectors = (double *) malloc(imagesMat.total() * sizeof(double));
     
+    double *  c_projections; 
+    double *  d_projections; 
+    cloudMalloc(socket, (void **)&c_projections, imagesMat.rows * imagesMat.rows * sizeof(double));
+    d_projections = (double *) malloc(imagesMat.rows * imagesMat.rows * sizeof(double));
+    
     CloudTimer cloudTimer;
     cloudTimer.start();
   
@@ -181,11 +186,9 @@ int main(int argc, char **argv) {
     cloudMemcpy(socket,  c_images,  imagesMat.data,  imagesMat.total() * imagesMat.elemSize(), cloudMemcpyClientToCloud, NoCompression /*SnappyCompression*/);
     
 
-    for (int i = 0; i < 10; i ++)
-      printf("%d\t%d\t%d\n", i , d_images[i], images[0].data[i]);
     printf("labels.size %d\t images total %d\t images elem %d\n", labels.size(),  imagesMat.total() ,imagesMat.elemSize());
   
-    cloudFaceTrain(socket, imagesMat.rows, imagesMat.cols, c_images, c_labels, c_eigenValues, c_eigenVectors, c_mean);
+    cloudFaceTrain(socket, imagesMat.rows, imagesMat.cols, c_images, c_labels, c_eigenValues, c_eigenVectors, c_mean, c_projections);
     
     cloudTimer.end();    
     double time_in_seconds = cloudTimer.getDurationInSeconds();
@@ -193,15 +196,26 @@ int main(int argc, char **argv) {
     cloudMemcpy(socket,  d_mean,  c_mean,  imagesMat.cols * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
     cloudMemcpy(socket,  d_eigenValues,  c_eigenValues,  imagesMat.rows * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
     cloudMemcpy(socket,  d_eigenVectors,  c_eigenVectors,  imagesMat.total() * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
+    cloudMemcpy(socket,  d_projections,  c_projections,   imagesMat.rows * imagesMat.rows * sizeof(double), cloudMemcpyCloudToClient, NoCompression /*SnappyCompression*/);
 
 
     end = std::chrono::high_resolution_clock::now();
     time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
     std::cout << "Total reading time: " << time_span.count() << "sec" << std::endl;
-    model->MPItrain(images, labels);
+    model->setMat("eigenvalues", Mat(imagesMat.rows, 1 , CV_64FC1, d_eigenValues));
+    model->setMat("eigenvectors", Mat(imagesMat.cols, imagesMat.rows , CV_64FC1, d_eigenVectors));
+    model->setMat("mean", Mat(1, imagesMat.cols , CV_64FC1, d_mean));
+    vector<Mat> projectionsVec;
+    for (int i = 0 ; i < imagesMat.rows; i++)
+      projectionsVec.push_back(Mat(1, imagesMat.rows, CV_64FC1, reinterpret_cast<double *>(d_projections) + imagesMat.rows));
+    model->setMatVector("projections", projectionsVec);
+
+
+
+//    model->MPItrain(images, labels);
     // The following line predicts the label of a given
     // test image:
-    int predictedLabel = model->predict(testSample);
+    int predictedLabel = 0;// model->predict(testSample);
     //
     // To get the confidence of a prediction call the model with:
     //
@@ -217,6 +231,9 @@ int main(int argc, char **argv) {
     Mat W = model->getMat("eigenvectors");
     // Get the sample mean from the training data
     Mat mean = model->getMat("mean");
+
+    std::cout<< eigenvalues <<std::endl;
+
     // Display or save:
     if(argc == 2) {
         imshow("mean", norm_0_255(mean.reshape(1, images[0].rows)));
