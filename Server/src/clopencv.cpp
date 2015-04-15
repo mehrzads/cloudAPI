@@ -40,16 +40,22 @@ cloudError_t cloudFaceTrain(int rows, int cols,
   model->MPItrain(imagesVec, labelsVec);
   // Here is how to get the eigenvalues of this Eigenfaces model:
   Mat eigenValuesMat = model->getMat("eigenvalues");
-  memcpy(eigenValues, eigenValuesMat.data, eigenValuesMat.total() * eigenValuesMat.elemSize());
-  printf("EigenValues %dX%d %d %d\n", eigenvalues.rows, eigenvalues.cols, eigenvalues.elemSize(), eigenvalues.type()); 
+  memcpy(eigenValues, reinterpret_cast<double *>(eigenValuesMat.data), eigenValuesMat.total() * eigenValuesMat.elemSize());
+  printf("EigenValues %dX%d %d %d\n", eigenValuesMat.rows, eigenValuesMat.cols, eigenValuesMat.elemSize(), eigenValuesMat.type()); 
   // And we can do the same to display the Eigenvectors (read Eigenfaces):
   Mat eigenVectorsMat = model->getMat("eigenvectors");
-  memcpy(eigenVectors, eigenVectorsMat.data, eigenVectorsMat.total() * eigenVectorsMat.elemSize());
-  printf("EigenVectors %dX%d %d %d\n", W.rows, W.cols, W.elemSize(), W.type()); 
+  memcpy(eigenVectors, reinterpret_cast<double *>(eigenVectorsMat.data), eigenVectorsMat.total() * eigenVectorsMat.elemSize());
+  printf("EigenVectors %dX%d %d %d\n", eigenVectorsMat.rows, eigenVectorsMat.cols, eigenVectorsMat.elemSize(), eigenVectorsMat.type()); 
   // Get the sample mean from the training data
   Mat meanMat = model->getMat("mean");
-  memcpy(mean, meanMat.data, meanMat.total() * meanMat.elemSize());
-  printf("mean %dX%d %d %d\n", mean.rows, mean.cols, mean.elemSize(), mean.type()); 
+  memcpy(mean, reinterpret_cast<double *>(meanMat.data), meanMat.total() * meanMat.elemSize());
+  printf("mean %dX%d %d %d\n", meanMat.rows, meanMat.cols, meanMat.elemSize(), meanMat.type());
+
+  vector<Mat> projectionsVec = model->getMatVector("projections");
+  printf("Projections %d %dX%d %d %d\n", projectionsVec.size(), projectionsVec[0].rows, projectionsVec[0].cols, projectionsVec[0].elemSize(), projectionsVec[0].type());
+
+  
+
 
   printf("cloud Face Train is called\n");
   return CloudSuccess; 
@@ -63,6 +69,9 @@ cloudError_t handleClOpenCVFunction(cloudFunctionKind functionType, std::string 
             facetrainMessage.cols(),
             reinterpret_cast<char *>(facetrainMessage.images()),
             reinterpret_cast<int *>(facetrainMessage.labels()),
+            reinterpret_cast<double *>(facetrainMessage.eigenvalues()),
+            reinterpret_cast<double *>(facetrainMessage.eigenvectors()),
+            reinterpret_cast<double *>(facetrainMessage.mean()),
 	    mpiInfo
 	    );
        break;
